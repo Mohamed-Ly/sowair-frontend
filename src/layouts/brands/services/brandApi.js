@@ -14,6 +14,12 @@ export function brandSubmitData(data) {
   return formData;
 }
 
+// الـ axios instance ي带头 application/json بشكل افتراضي، ولو بقي 헤nder كذا
+// هيحوّل الـ FormData كلها لـ JSON والملف بيبقى {} والباك اند بيقع.
+// لازم نحدّد multipart/form-data وقت وجود ملف.
+const multipartConfig = { headers: { "Content-Type": "multipart/form-data" } };
+const submitConfig = (data) => (data.image instanceof File ? multipartConfig : undefined);
+
 export const brandApi = {
   // الحصول على جميع الماركات
   getAllBrands: (params) => api.get("/brands", { params }),
@@ -22,10 +28,12 @@ export const brandApi = {
   getBrand: (id) => api.get(`/brands/${id}`),
 
   // إنشاء ماركة جديدة
-  createBrand: (data) => api.post("/brands", brandSubmitData(data)),
+  createBrand: (data) =>
+    api.post("/brands", brandSubmitData(data), submitConfig(data)),
 
   // تحديث ماركة
-  updateBrand: (id, data) => api.patch(`/brands/${id}`, brandSubmitData(data)),
+  updateBrand: (id, data) =>
+    api.patch(`/brands/${id}`, brandSubmitData(data), submitConfig(data)),
 
   // حذف ماركة
   deleteBrand: (id) => api.delete(`/brands/${id}`),

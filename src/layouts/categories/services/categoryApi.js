@@ -14,6 +14,12 @@ export function categorySubmitData(data) {
   return formData;
 }
 
+// الـ axios instance ي带头 application/json بشكل افتراضي، ولو بقي 헤nder كذا
+// هيحوّل الـ FormData كلها لـ JSON والملف بيبقى {} والباك اند بيقع.
+// لازم نحدّد multipart/form-data وقت وجود ملف.
+const multipartConfig = { headers: { "Content-Type": "multipart/form-data" } };
+const submitConfig = (data) => (data.image instanceof File ? multipartConfig : undefined);
+
 export const categoryApi = {
   // الحصول على جميع التصنيفات
   getAllCategories: (params) => api.get("/categories", { params }),
@@ -22,10 +28,12 @@ export const categoryApi = {
   getCategory: (id) => api.get(`/categories/${id}`),
 
   // إنشاء تصنيف جديد
-  createCategory: (data) => api.post("/categories", categorySubmitData(data)),
+  createCategory: (data) =>
+    api.post("/categories", categorySubmitData(data), submitConfig(data)),
 
   // تحديث تصنيف
-  updateCategory: (id, data) => api.patch(`/categories/${id}`, categorySubmitData(data)),
+  updateCategory: (id, data) =>
+    api.patch(`/categories/${id}`, categorySubmitData(data), submitConfig(data)),
 
   // حذف تصنيف
   deleteCategory: (id) => api.delete(`/categories/${id}`),
