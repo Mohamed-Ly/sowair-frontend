@@ -12,6 +12,11 @@ import {
   FormControlLabel,
   Switch,
   Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Box,
 } from "@mui/material";
 import Icon from "@mui/material/Icon";
 
@@ -23,16 +28,20 @@ import MDButton from "components/MDButton";
 // Context
 import { useMaterialUIController } from "context";
 
-function CreateCategoryModal({ open, onClose, onSubmit }) {
+function CreateCategoryModal({ open, onClose, onSubmit, parentCategories }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
   const [formData, setFormData] = useState({
     name: "",
+    parentId: "",
     isActive: true,
+    imageUrl: "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, checked } = e.target;
@@ -69,7 +78,17 @@ function CreateCategoryModal({ open, onClose, onSubmit }) {
 
     setLoading(true);
     try {
-      await onSubmit(formData);
+      const submitData = {
+        name: formData.name.trim(),
+        isActive: formData.isActive,
+        parentId: formData.parentId ? parseInt(formData.parentId) : null,
+      };
+      if (imageFile) {
+        submitData.image = imageFile;
+      } else if (formData.imageUrl && formData.imageUrl.trim()) {
+        submitData.image = formData.imageUrl.trim();
+      }
+      await onSubmit(submitData);
       handleClose();
     } catch (error) {
       console.error("Error creating category:", error);
@@ -79,9 +98,28 @@ function CreateCategoryModal({ open, onClose, onSubmit }) {
   };
 
   const handleClose = () => {
-    setFormData({ name: "", isActive: true });
+    setFormData({ name: "", parentId: "", isActive: true, imageUrl: "" });
     setErrors({});
+    setImageFile(null);
+    setImagePreview(null);
     onClose();
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors((prev) => ({ ...prev, image: "حجم الصورة يجب ألا يتجاوز 5MB" }));
+      return;
+    }
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setErrors((prev) => ({ ...prev, image: "نوع الملف غير مدعوم. استخدم JPG, PNG, أو WebP" }));
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    if (errors.image) setErrors((prev) => ({ ...prev, image: "" }));
   };
 
   return (
@@ -133,6 +171,37 @@ function CreateCategoryModal({ open, onClose, onSubmit }) {
             </Grid>
 
             <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>التصنيف الأب (اختياري)</InputLabel>
+                <Select
+                  name="parentId"
+                  value={formData.parentId}
+                  onChange={handleChange}
+                  label="التصنيف الأب (اختياري)"
+                  disabled={loading}
+                  sx={{
+                    height: "42px",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
+                    },
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>بدون أب (تصنيف رئيسي)</em>
+                  </MenuItem>
+                  {(parentCategories || []).map((cat) => (
+                    <MenuItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
               <FormControlLabel
                 control={
                   <Switch
@@ -153,6 +222,90 @@ function CreateCategoryModal({ open, onClose, onSubmit }) {
                 }
                 disabled={loading}
               />
+            </Grid>
+
+            <Grid item xs={12}>
+              <MDTypography variant="h6" gutterBottom>
+                صورة التصنيف (اختياري)
+              </MDTypography>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="رابط الصورة (URL)"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleChange}
+                disabled={loading}
+                placeholder="/uploads/example.jpg أو رابط كامل https://..."
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: darkMode ? "text.main" : "text.primary",
+                  },
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
+                    },
+                  },
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  border: `2px dashed ${
+                    errors.image ? "red" : darkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"
+                  }`,
+                  borderRadius: 2,
+                  p: 3,
+                  textAlign: "center",
+                  cursor: "pointer",
+                  backgroundColor: darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)",
+                }}
+                onClick={() => document.getElementById("category-image-input").click()}
+              >
+                <input
+                  id="category-image-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg,image/webp"
+                  onChange={handleImageChange}
+                  style={{ display: "none" }}
+                  disabled={loading}
+                />
+
+                {imagePreview ? (
+                  <Box>
+                    <img
+                      src={imagePreview}
+                      alt="معاينة الصورة"
+                      style={{ maxWidth: "100%", maxHeight: 200, borderRadius: 8 }}
+                    />
+                    <MDTypography variant="body2" color="text" sx={{ mt: 1 }}>
+                      انقر لتغيير الصورة
+                    </MDTypography>
+                  </Box>
+                ) : (
+                  <Box>
+                    <Icon sx={{ fontSize: 48, opacity: 0.5, mb: 1 }}>cloud_upload</Icon>
+                    <MDTypography variant="body2" color="text">
+                      انقر لرفع صورة التصنيف من الجهاز
+                    </MDTypography>
+                    <MDTypography variant="caption" color="text" sx={{ opacity: 0.7 }}>
+                      JPG, PNG, WebP - الحد الأقصى 5MB
+                    </MDTypography>
+                  </Box>
+                )}
+              </Box>
+              {errors.image && (
+                <MDTypography variant="caption" color="error" sx={{ mt: 1, display: "block" }}>
+                  {errors.image}
+                </MDTypography>
+              )}
             </Grid>
           </Grid>
         </DialogContent>
@@ -202,6 +355,11 @@ CreateCategoryModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  parentCategories: PropTypes.arrayOf(PropTypes.object),
+};
+
+CreateCategoryModal.defaultProps = {
+  parentCategories: [],
 };
 
 export default CreateCategoryModal;

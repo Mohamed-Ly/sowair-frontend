@@ -17,6 +17,15 @@ export const orderApi = {
   // الأدمن: حذف طلب
   deleteOrder: (orderId) => api.delete(`/orders/admin/${orderId}`),
 
+  // الأدمن: قائمة المندوبين
+  getDeliverers: () => api.get("/delivery/admin/deliverers"),
+
+  // الأدمن: تعيين مندوب توصيل لطلب
+  assignDelivery: (data) => api.post("/delivery/admin/assign", data),
+
+  // الأدمن: كل التعيينات
+  getAllAssignments: (params) => api.get("/delivery/admin/assignments", { params }),
+
   // المستخدم: طلباتي
   getUserOrders: (params) => api.get("/orders", { params }),
 

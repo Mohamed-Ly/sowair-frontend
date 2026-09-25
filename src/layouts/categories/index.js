@@ -49,6 +49,7 @@ function Categories() {
   const { darkMode } = controller;
 
   const [categories, setCategories] = useState([]);
+  const [parentCategories, setParentCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -113,6 +114,23 @@ function Categories() {
     fetchCategories();
   }, []);
 
+  // جلب التصنيفات الجذرية (للاصق والاختيار كتصنيف أب)
+  useEffect(() => {
+    const fetchParents = async () => {
+      try {
+        const response = await categoryApi.getAllCategories({
+          parentId: "null",
+          limit: 500,
+        });
+        const responseData = response.data?.data || response.data;
+        setParentCategories(responseData?.items || []);
+      } catch (error) {
+        console.error("❌ Error fetching parent categories:", error);
+      }
+    };
+    fetchParents();
+  }, []);
+
   // البحث مع debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -173,6 +191,12 @@ function Categories() {
   const openDeleteModal = (category) => {
     setSelectedCategory(category);
     setDeleteModalOpen(true);
+  };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    return `http://localhost:5000${imagePath}`;
   };
 
   // مسح البحث
@@ -354,7 +378,31 @@ function Categories() {
                             </TableCell>
                             <TableCell
                               sx={{
-                                width: "25%",
+                                width: "20%",
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                fontSize: "0.875rem",
+                                color: darkMode ? "text.main" : "text.primary",
+                                py: 2,
+                              }}
+                            >
+                              التصنيف الأب
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                width: "13%",
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                fontSize: "0.875rem",
+                                color: darkMode ? "text.main" : "text.primary",
+                                py: 2,
+                              }}
+                            >
+                              الصورة
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                width: "15%",
                                 textAlign: "center",
                                 fontWeight: "bold",
                                 fontSize: "0.875rem",
@@ -417,6 +465,57 @@ function Categories() {
                                 <MDTypography variant="button" fontWeight="medium">
                                   {category.name}
                                 </MDTypography>
+                              </TableCell>
+                              <TableCell style={{ textAlign: "center" }}>
+                                {category.parent ? (
+                                  <MDTypography variant="button" fontWeight="medium" color="info">
+                                    {category.parent.name}
+                                  </MDTypography>
+                                ) : (
+                                  <MDTypography variant="caption" color="text">
+                                    -
+                                  </MDTypography>
+                                )}
+                              </TableCell>
+                              <TableCell style={{ textAlign: "center" }}>
+                                {category.image ? (
+                                  <MDBox
+                                    component="img"
+                                    src={getImageUrl(category.image)}
+                                    alt={category.name}
+                                    onError={(e) => {
+                                      e.target.style.display = "none";
+                                    }}
+                                    ml={0}
+                                    sx={{
+                                      width: 40,
+                                      height: 40,
+                                      borderRadius: "8px",
+                                      objectFit: "cover",
+                                      border: "1px solid",
+                                      borderColor: darkMode
+                                        ? "rgba(255,255,255,0.2)"
+                                        : "rgba(0,0,0,0.1)",
+                                    }}
+                                  />
+                                ) : (
+                                  <MDBox
+                                    display="inline-flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    width={40}
+                                    height={40}
+                                    borderRadius="8px"
+                                    sx={{
+                                      backgroundColor: darkMode
+                                        ? "rgba(255,255,255,0.05)"
+                                        : "rgba(0,0,0,0.03)",
+                                      color: darkMode ? "text.main" : "text.secondary",
+                                    }}
+                                  >
+                                    <Icon sx={{ fontSize: 24 }}>image</Icon>
+                                  </MDBox>
+                                )}
                               </TableCell>
                               <TableCell style={{ textAlign: "center" }}>
                                 <MDTypography
@@ -583,6 +682,7 @@ function Categories() {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onSubmit={handleCreateCategory}
+        parentCategories={parentCategories}
       />
 
       <EditCategoryModal
@@ -593,6 +693,7 @@ function Categories() {
         }}
         onSubmit={handleEditCategory}
         category={selectedCategory}
+        parentCategories={parentCategories}
       />
 
       <DeleteCategoryModal

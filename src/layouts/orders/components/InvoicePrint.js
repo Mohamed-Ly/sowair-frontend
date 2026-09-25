@@ -119,7 +119,7 @@ function InvoicePrint({ open, onClose, order }) {
               معلومات المتجر
             </MDTypography>
             <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              متجر العطور الفاخرة
+              المتجر الإلكتروني
             </MDTypography>
             <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
               طرابلس - ليبيا
@@ -180,8 +180,8 @@ function InvoicePrint({ open, onClose, order }) {
                   <tr key={item.id}>
                     <td>
                       {item.variant?.product?.name}
-                      {item.variant?.sizeMl && ` - ${item.variant.sizeMl} مل`}
-                      {item.variant?.concentration && ` - ${item.variant.concentration}`}
+                      {item.variant?.option1 && ` - ${item.variant.option1}`}
+                      {item.variant?.option2 && ` - ${item.variant.option2}`}
                     </td>
                     <td>{item.qty}</td>
                     <td>{formatPrice(item.unitPriceCents)}</td>
@@ -264,8 +264,8 @@ InvoicePrint.propTypes = {
         qty: PropTypes.number,
         unitPriceCents: PropTypes.number,
         variant: PropTypes.shape({
-          sizeMl: PropTypes.number,
-          concentration: PropTypes.string,
+          option1: PropTypes.string,
+          option2: PropTypes.string,
           product: PropTypes.shape({
             name: PropTypes.string,
           }),

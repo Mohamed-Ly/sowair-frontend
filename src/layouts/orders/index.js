@@ -47,6 +47,7 @@ import orderApi from "./services/orderApi";
 import OrderDetailsModal from "./components/OrderDetailsModal";
 import UpdateStatusModal from "./components/UpdateStatusModal";
 import DeleteOrderModal from "./components/DeleteOrderModal";
+import AssignDeliveryModal from "./components/AssignDeliveryModal";
 import OrderStatsCard from "./components/OrderStatsCard";
 import InvoicePrint from "./components/InvoicePrint";
 
@@ -69,6 +70,7 @@ function Orders() {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Pagination
@@ -211,6 +213,20 @@ function Orders() {
   const openDeleteModal = (order) => {
     setSelectedOrder(order);
     setDeleteModalOpen(true);
+  };
+
+  // فتح تعيين مندوب توصيل
+  const openAssignModal = (order) => {
+    setSelectedOrder(order);
+    setAssignModalOpen(true);
+  };
+
+  // تعيين مندوب توصيل
+  const handleAssignDelivery = async (assignData) => {
+    await orderApi.assignDelivery(assignData);
+    await fetchOrders(pagination.page, pagination.limit);
+    setAssignModalOpen(false);
+    setSelectedOrder(null);
   };
 
   // طباعة الفاتورة
@@ -499,6 +515,20 @@ function Orders() {
                                     <Icon>print</Icon>
                                   </IconButton>
 
+                                  {/* تعيين مندوب */}
+                                  <IconButton
+                                    color="warning"
+                                    size="small"
+                                    onClick={() => openAssignModal(order)}
+                                    disabled={
+                                      order.status !== "PENDING" &&
+                                      order.status !== "CONFIRMED" &&
+                                      order.status !== "SHIPPING"
+                                    }
+                                  >
+                                    <Icon>delivery_dining</Icon>
+                                  </IconButton>
+
                                   {/* حذف */}
                                   <IconButton
                                     color="error"
@@ -611,6 +641,16 @@ function Orders() {
           setSelectedOrder(null);
         }}
         onConfirm={handleDeleteOrder}
+        order={selectedOrder}
+      />
+
+      <AssignDeliveryModal
+        open={assignModalOpen}
+        onClose={() => {
+          setAssignModalOpen(false);
+          setSelectedOrder(null);
+        }}
+        onSubmit={handleAssignDelivery}
         order={selectedOrder}
       />
     </DashboardLayout>

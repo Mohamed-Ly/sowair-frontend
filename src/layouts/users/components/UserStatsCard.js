@@ -83,6 +83,15 @@ function UserStatsCard({ stats, loading, darkMode }) {
       />
 
       <StatCard
+        title="المندوبين"
+        value={stats?.deliveries || 0}
+        icon="delivery_dining"
+        color="secondary"
+        loading={loading}
+        darkMode={darkMode}
+      />
+
+      <StatCard
         title="المستخدمين النشطين"
         value={stats?.total || 0}
         icon="group"
@@ -99,6 +108,7 @@ UserStatsCard.propTypes = {
     total: PropTypes.number,
     customers: PropTypes.number,
     admins: PropTypes.number,
+    deliveries: PropTypes.number,
   }),
   loading: PropTypes.bool,
   darkMode: PropTypes.bool,

@@ -186,6 +186,12 @@ function Brands() {
     setSearchTerm("");
   };
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    return `http://localhost:5000${imagePath}`;
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -372,7 +378,19 @@ function Brands() {
                             </TableCell>
                             <TableCell
                               sx={{
-                                width: "25%",
+                                width: "13%",
+                                textAlign: "center",
+                                fontWeight: "bold",
+                                fontSize: "0.875rem",
+                                color: darkMode ? "text.main" : "text.primary",
+                                py: 2,
+                              }}
+                            >
+                              الصورة
+                            </TableCell>
+                            <TableCell
+                              sx={{
+                                width: "15%",
                                 textAlign: "center",
                                 fontWeight: "bold",
                                 fontSize: "0.875rem",
@@ -440,6 +458,45 @@ function Brands() {
                                 <MDTypography variant="button" fontWeight="medium" color="text">
                                   {brand.country || "-"}
                                 </MDTypography>
+                              </TableCell>
+                              <TableCell style={{ textAlign: "center" }}>
+                                {brand.image ? (
+                                  <MDBox
+                                    component="img"
+                                    src={getImageUrl(brand.image)}
+                                    alt={brand.name}
+                                    onError={(e) => {
+                                      e.target.style.display = "none";
+                                    }}
+                                    sx={{
+                                      width: 40,
+                                      height: 40,
+                                      borderRadius: "8px",
+                                      objectFit: "cover",
+                                      border: "1px solid",
+                                      borderColor: darkMode
+                                        ? "rgba(255,255,255,0.2)"
+                                        : "rgba(0,0,0,0.1)",
+                                    }}
+                                  />
+                                ) : (
+                                  <MDBox
+                                    display="inline-flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    width={40}
+                                    height={40}
+                                    borderRadius="8px"
+                                    sx={{
+                                      backgroundColor: darkMode
+                                        ? "rgba(255,255,255,0.05)"
+                                        : "rgba(0,0,0,0.03)",
+                                      color: darkMode ? "text.main" : "text.secondary",
+                                    }}
+                                  >
+                                    <Icon sx={{ fontSize: 24 }}>image</Icon>
+                                  </MDBox>
+                                )}
                               </TableCell>
                               <TableCell style={{ textAlign: "center" }}>
                                 <MDTypography

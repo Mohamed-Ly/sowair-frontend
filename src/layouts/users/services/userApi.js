@@ -19,6 +19,9 @@ export const userApi = {
 
   // حذف مستخدم (للأدمن)
   deleteUserAdmin: (userId) => api.delete(`/users/admin/${userId}`),
+
+  // تغيير دور مستخدم (للأدمن)
+  changeUserRole: (userId, role) => api.patch(`/users/admin/${userId}/role`, { role }),
 };
 
 export default userApi;

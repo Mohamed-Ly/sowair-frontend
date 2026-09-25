@@ -212,8 +212,9 @@ function Products() {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith("http")) return imagePath;
-    // 🔧 المسار المباشر
-    return `http://localhost:5000/uploads/${imagePath}`;
+    return imagePath.startsWith("/")
+      ? `http://localhost:5000${imagePath}`
+      : `http://localhost:5000/uploads/${imagePath}`;
   };
 
   return (
@@ -495,6 +496,9 @@ function Products() {
                                   <Avatar
                                     src={imageUrl}
                                     alt={product.name}
+                                    onError={(e) => {
+                                      e.target.style.display = "none";
+                                    }}
                                     sx={{
                                       width: 60,
                                       height: 60,

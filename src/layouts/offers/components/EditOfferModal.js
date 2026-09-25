@@ -48,6 +48,15 @@ function EditOfferModal({ open, onClose, onSubmit, offer }) {
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
+  // بناء URL الصورة مهما كان شكل المسار المخزَّن
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    return imagePath.startsWith("/")
+      ? `http://localhost:5000${imagePath}`
+      : `http://localhost:5000/uploads/${imagePath}`;
+  };
+
   function toDateTimeLocalValue(dateInput) {
     if (!dateInput) return "";
     const d = new Date(dateInput);
@@ -108,7 +117,7 @@ function EditOfferModal({ open, onClose, onSubmit, offer }) {
       });
 
       if (offer.image) {
-        setImagePreview(offer.image);
+        setImagePreview(getImageUrl(offer.image));
       }
     }
   }, [offer]);
@@ -643,7 +652,7 @@ function EditOfferModal({ open, onClose, onSubmit, offer }) {
                 ) : offer.image ? (
                   <Box>
                     <img
-                      src={offer.image}
+                      src={getImageUrl(offer.image)}
                       alt="Current"
                       style={{ maxWidth: "100%", maxHeight: 200, borderRadius: 8 }}
                     />

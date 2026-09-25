@@ -401,7 +401,7 @@ function ProductVariants() {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    placeholder="ابحث عن متغير بالحجم، التركيز، السعر، أو SKU..."
+                    placeholder="ابحث عن متغير بالخيارات، السعر، أو SKU..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     InputProps={{
@@ -544,7 +544,7 @@ function ProductVariants() {
                                 py: 2,
                               }}
                             >
-                              الحجم
+                              الخيار 1
                             </TableCell>
                             <TableCell
                               sx={{
@@ -556,7 +556,7 @@ function ProductVariants() {
                                 py: 2,
                               }}
                             >
-                              التركيز
+                              الخيار 2
                             </TableCell>
                             <TableCell
                               sx={{
@@ -644,11 +644,11 @@ function ProductVariants() {
                                 </MDTypography>
                               </TableCell>
 
-                              {/* الحجم */}
+                              {/* الخيار 1 */}
                               <TableCell style={{ textAlign: "center" }}>
-                                {variant.sizeMl ? (
+                                {variant.option1 ? (
                                   <Chip
-                                    label={`${variant.sizeMl} مل`}
+                                    label={variant.option1}
                                     color="primary"
                                     variant="outlined"
                                     size="small"
@@ -664,11 +664,11 @@ function ProductVariants() {
                                 )}
                               </TableCell>
 
-                              {/* التركيز */}
+                              {/* الخيار 2 */}
                               <TableCell style={{ textAlign: "center" }}>
-                                {variant.concentration ? (
+                                {variant.option2 ? (
                                   <Chip
-                                    label={variant.concentration}
+                                    label={variant.option2}
                                     color="secondary"
                                     variant="outlined"
                                     size="small"

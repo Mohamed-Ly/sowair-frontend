@@ -21,7 +21,7 @@ function DeleteOfferModal({ open, onClose, onConfirm, offer }) {
       case "DISCOUNT_PERCENTAGE":
         return `${offer.discountPercentage}%`;
       case "DISCOUNT_AMOUNT":
-        return `${(offer.discountAmount / 100).toFixed(2)} ر.س`;
+        return `${(offer.discountAmount / 100).toFixed(2)} د.ل`;
       case "BUY_ONE_GET_ONE":
         return "2x1";
       case "FREE_SHIPPING":

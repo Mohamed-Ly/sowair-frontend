@@ -229,8 +229,8 @@ function OrderDetailsModal({ open, onClose, order }) {
                       {item.variant?.product?.name}
                     </MDTypography>
                     <MDTypography variant="caption" color={darkMode ? "white" : "dark"}>
-                      {item.variant?.sizeMl && `الحجم: ${item.variant.sizeMl} مل`}
-                      {item.variant?.concentration && ` • التركيز: ${item.variant.concentration}`}
+                      {item.variant?.option1 && `${item.variant.option1}`}
+                      {item.variant?.option2 && ` • ${item.variant.option2}`}
                     </MDTypography>
                   </Grid>
                   <Grid item xs={6} sm={2}>
@@ -312,8 +312,8 @@ OrderDetailsModal.propTypes = {
         qty: PropTypes.number,
         unitPriceCents: PropTypes.number,
         variant: PropTypes.shape({
-          sizeMl: PropTypes.number,
-          concentration: PropTypes.string,
+          option1: PropTypes.string,
+          option2: PropTypes.string,
           product: PropTypes.shape({
             name: PropTypes.string,
           }),

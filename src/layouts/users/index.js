@@ -78,6 +78,7 @@ function Users() {
   const roleConfig = {
     ADMIN: { color: "error", label: "أدمن", icon: "admin_panel_settings" },
     CUSTOMER: { color: "info", label: "عميل", icon: "person" },
+    DELIVERY: { color: "warning", label: "مندوب", icon: "delivery_dining" },
   };
 
   // Set RTL direction
@@ -180,6 +181,34 @@ function Users() {
     }
   };
 
+  // تغيير دور مستخدم (تفعيل/تعطيل المندوب)
+  const handleChangeRole = async (user, newRole) => {
+    const confirmMsg =
+      newRole === "DELIVERY"
+        ? `هل تريد تفعيل "${user.name}" كمندوب توصيل؟`
+        : `هل تريد إلغاء دور المندوب عن "${user.name}" وإعادته عميلاً؟`;
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      await userApi.changeUserRole(user.id, newRole);
+      await fetchUsers(pagination.page, pagination.limit);
+      await fetchStats(); // تحديث الإحصائيات
+    } catch (error) {
+      const msg = error.response?.data?.message || "فشل تغيير الدور";
+      window.alert(msg);
+    }
+  };
+
+  // المسؤول الحالي من localStorage لمنع تغيير دوره
+  const currentUserId = (() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("user"));
+      return stored?.id;
+    } catch {
+      return null;
+    }
+  })();
+
   // فتح تفاصيل المستخدم
   //   const openDetailsModal = (user) => {
   //     setSelectedUser(user);
@@ -272,6 +301,7 @@ function Users() {
                     <MenuItem value="">الكل</MenuItem>
                     <MenuItem value="ADMIN">أدمن</MenuItem>
                     <MenuItem value="CUSTOMER">عميل</MenuItem>
+                    <MenuItem value="DELIVERY">مندوب</MenuItem>
                   </Select>
                 </FormControl>
               </MDBox>
@@ -414,10 +444,53 @@ function Users() {
                               </TableCell>
                               <TableCell sx={{ textAlign: "center" }}>
                                 <MDBox display="flex" justifyContent="center" gap={1}>
+                                  {/* تفعيل/تعطيل المندوب */}
+                                  {user.role === "CUSTOMER" && (
+                                    <IconButton
+                                      color="warning"
+                                      size="small"
+                                      title="تعيين كمندوب توصيل"
+                                      onClick={() => handleChangeRole(user, "DELIVERY")}
+                                      sx={{
+                                        backgroundColor: darkMode
+                                          ? "rgba(255,152,0,0.1)"
+                                          : "rgba(255,152,0,0.05)",
+                                        "&:hover": {
+                                          backgroundColor: darkMode
+                                            ? "rgba(255,152,0,0.2)"
+                                            : "rgba(255,152,0,0.1)",
+                                        },
+                                      }}
+                                    >
+                                      <Icon fontSize="small">delivery_dining</Icon>
+                                    </IconButton>
+                                  )}
+                                  {user.role === "DELIVERY" && (
+                                    <IconButton
+                                      color="info"
+                                      size="small"
+                                      title="إلغاء دور المندوب وإعادته عميلاً"
+                                      onClick={() => handleChangeRole(user, "CUSTOMER")}
+                                      sx={{
+                                        backgroundColor: darkMode
+                                          ? "rgba(33,150,243,0.1)"
+                                          : "rgba(33,150,243,0.05)",
+                                        "&:hover": {
+                                          backgroundColor: darkMode
+                                            ? "rgba(33,150,243,0.2)"
+                                            : "rgba(33,150,243,0.1)",
+                                        },
+                                      }}
+                                    >
+                                      <Icon fontSize="small">person</Icon>
+                                    </IconButton>
+                                  )}
+
                                   {/* حذف */}
                                   <IconButton
                                     color="error"
                                     size="small"
+                                    disabled={user.id === currentUserId}
                                     onClick={() => openDeleteModal(user)}
                                   >
                                     <Icon>delete</Icon>

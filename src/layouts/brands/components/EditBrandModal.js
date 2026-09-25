@@ -13,6 +13,8 @@ import {
   Switch,
   Grid,
   MenuItem,
+  Box,
+  Checkbox,
 } from "@mui/material";
 import Icon from "@mui/material/Icon";
 
@@ -32,9 +34,19 @@ function EditBrandModal({ open, onClose, onSubmit, brand }) {
     name: "",
     country: "",
     isActive: true,
+    imageUrl: "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [removeImage, setRemoveImage] = useState(false);
+
+  function buildImageUrl(image) {
+    if (!image) return null;
+    if (image.startsWith("http")) return image;
+    return `http://localhost:5000${image}`;
+  }
 
   // قائمة الدول العربية والعالمية
   const countries = [
@@ -73,7 +85,11 @@ function EditBrandModal({ open, onClose, onSubmit, brand }) {
         name: brand.name || "",
         country: brand.country || "",
         isActive: brand.isActive ?? true,
+        imageUrl: "",
       });
+      setImageFile(null);
+      setRemoveImage(false);
+      setImagePreview(brand.image ? buildImageUrl(brand.image) : null);
     }
   }, [brand]);
 
@@ -113,9 +129,17 @@ function EditBrandModal({ open, onClose, onSubmit, brand }) {
     try {
       // تنظيف البيانات - إذا كان البلد فارغاً نرسل null
       const submitData = {
-        ...formData,
+        name: formData.name.trim(),
         country: formData.country || null,
+        isActive: formData.isActive,
       };
+      if (imageFile) {
+        submitData.image = imageFile;
+      } else if (removeImage) {
+        submitData.image = "";
+      } else if (formData.imageUrl && formData.imageUrl.trim()) {
+        submitData.image = formData.imageUrl.trim();
+      }
 
       await onSubmit(submitData);
     } catch (error) {
@@ -130,9 +154,31 @@ function EditBrandModal({ open, onClose, onSubmit, brand }) {
       name: "",
       country: "",
       isActive: true,
+      imageUrl: "",
     });
     setErrors({});
+    setImageFile(null);
+    setImagePreview(null);
+    setRemoveImage(false);
     onClose();
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors((prev) => ({ ...prev, image: "حجم الصورة يجب ألا يتجاوز 5MB" }));
+      return;
+    }
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setErrors((prev) => ({ ...prev, image: "نوع الملف غير مدعوم. استخدم JPG, PNG, أو WebP" }));
+      return;
+    }
+    setImageFile(file);
+    setRemoveImage(false);
+    setImagePreview(URL.createObjectURL(file));
+    if (errors.image) setErrors((prev) => ({ ...prev, image: "" }));
   };
 
   if (!brand) return null;
@@ -244,6 +290,118 @@ function EditBrandModal({ open, onClose, onSubmit, brand }) {
                 disabled={loading}
               />
             </Grid>
+
+            <Grid item xs={12}>
+              <MDTypography variant="h6" gutterBottom>
+                صورة الماركة (اختياري)
+              </MDTypography>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="رابط صورة جديد (URL لوضع صورة أخرى)"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleChange}
+                disabled={loading}
+                placeholder="/uploads/example.jpg أو رابط كامل https://..."
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: darkMode ? "text.main" : "text.primary",
+                  },
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
+                    },
+                  },
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  border: `2px dashed ${
+                    errors.image ? "red" : darkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"
+                  }`,
+                  borderRadius: 2,
+                  p: 3,
+                  textAlign: "center",
+                  cursor: "pointer",
+                  backgroundColor: darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)",
+                }}
+                onClick={() => document.getElementById("brand-image-input").click()}
+              >
+                <input
+                  id="brand-image-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg,image/webp"
+                  onChange={handleImageChange}
+                  style={{ display: "none" }}
+                  disabled={loading}
+                />
+
+                {imagePreview ? (
+                  <Box>
+                    <img
+                      src={imagePreview}
+                      alt="معاينة الصورة"
+                      style={{ maxWidth: "100%", maxHeight: 200, borderRadius: 8 }}
+                    />
+                    <MDTypography variant="body2" color="text" sx={{ mt: 1 }}>
+                      انقر لتغيير الصورة
+                    </MDTypography>
+                  </Box>
+                ) : (
+                  <Box>
+                    <Icon sx={{ fontSize: 48, opacity: 0.5, mb: 1 }}>cloud_upload</Icon>
+                    <MDTypography variant="body2" color="text">
+                      لا توجد صورة حالياً - انقر لرفع صورة للتحديد
+                    </MDTypography>
+                    <MDTypography variant="caption" color="text" sx={{ opacity: 0.7 }}>
+                      JPG, PNG, WebP - الحد الأقصى 5MB
+                    </MDTypography>
+                  </Box>
+                )}
+              </Box>
+              {errors.image && (
+                <MDTypography variant="caption" color="error" sx={{ mt: 1, display: "block" }}>
+                  {errors.image}
+                </MDTypography>
+              )}
+            </Grid>
+
+            {brand.image && (
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={removeImage}
+                      onChange={(e) => {
+                        setRemoveImage(e.target.checked);
+                        if (e.target.checked) {
+                          setImagePreview(null);
+                          setImageFile(null);
+                        } else if (brand.image) {
+                          setImagePreview(buildImageUrl(brand.image));
+                        }
+                      }}
+                      color="error"
+                      disabled={loading || !!imageFile}
+                    />
+                  }
+                  label={
+                    <MDTypography variant="button" color="error" fontWeight="medium">
+                      إزالة الصورة الحالية
+                    </MDTypography>
+                  }
+                />
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
 

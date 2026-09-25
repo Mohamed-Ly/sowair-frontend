@@ -67,8 +67,8 @@ function DeleteVariantModal({ open, onClose, onConfirm, variant }) {
               هل أنت متأكد من حذف المتغير؟
             </MDTypography>
             <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"} mt={1}>
-              {variant.sizeMl && `الحجم: ${variant.sizeMl} مل`}
-              {variant.concentration && ` • التركيز: ${variant.concentration}`}
+              {variant.option1 && `الخيار 1: ${variant.option1}`}
+              {variant.option2 && ` • الخيار 2: ${variant.option2}`}
               {variant.sku && ` • SKU: ${variant.sku}`}
             </MDTypography>
           </MDBox>

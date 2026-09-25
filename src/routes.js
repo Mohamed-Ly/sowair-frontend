@@ -15,6 +15,7 @@ import ProductVariants from "layouts/variants";
 import Orders from "layouts/orders";
 import Users from "layouts/users";
 import Offers from "layouts/offers";
+import Reports from "layouts/reports";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -101,6 +102,14 @@ const routes = [
     icon: <Icon fontSize="small">group</Icon>,
     route: "/users",
     component: <Users />,
+  },
+  {
+    type: "collapse",
+    name: "التقارير",
+    key: "reports",
+    icon: <Icon fontSize="small">insert_chart</Icon>,
+    route: "/reports",
+    component: <Reports />,
   },
 
   {
