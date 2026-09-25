@@ -1,7 +1,7 @@
 // import api from "./api";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 // const API_URL = "https://perfume-project-production-b4c5.up.railway.app";
 
 export const authService = {

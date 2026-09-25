@@ -45,7 +45,7 @@ function EditBrandModal({ open, onClose, onSubmit, brand }) {
   function buildImageUrl(image) {
     if (!image) return null;
     if (image.startsWith("http")) return image;
-    return `http://localhost:5000${image}`;
+    return `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${image}`;
   }
 
   // قائمة الدول العربية والعالمية

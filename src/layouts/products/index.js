@@ -213,8 +213,8 @@ function Products() {
     if (!imagePath) return null;
     if (imagePath.startsWith("http")) return imagePath;
     return imagePath.startsWith("/")
-      ? `http://localhost:5000${imagePath}`
-      : `http://localhost:5000/uploads/${imagePath}`;
+      ? `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${imagePath}`
+      : `${process.env.REACT_APP_API_URL || "http://localhost:5000"}/uploads/${imagePath}`;
   };
 
   return (

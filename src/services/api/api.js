@@ -3,7 +3,7 @@ import jsCookie from "js-cookie";
 import { store } from "../../store/store";
 import { logout } from "../../store/slices/authSlice";
 
-const API_URL = "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 // جعل baseURL عاماً لجميع الـ APIs
 const api = axios.create({
