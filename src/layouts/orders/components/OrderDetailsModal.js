@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
+import MDBadge from "components/MDBadge";
 import { useMaterialUIController } from "context";
 
 function OrderDetailsModal({ open, onClose, order }) {
@@ -31,12 +32,30 @@ function OrderDetailsModal({ open, onClose, order }) {
     });
   };
 
+  // نفس الـ helper الموجود في layouts/products و layouts/brands
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    const base = process.env.REACT_APP_API_URL || "http://localhost:5000";
+    return imagePath.startsWith("/") ? `${base}${imagePath}` : `${base}/uploads/${imagePath}`;
+  };
+
   const statusConfig = {
     PENDING: { color: "warning", label: "قيد المراجعة", icon: "schedule" },
     CONFIRMED: { color: "info", label: "مؤكد", icon: "check_circle" },
     SHIPPING: { color: "primary", label: "قيد الشحن", icon: "local_shipping" },
+    PARTIALLY_DELIVERED: { color: "secondary", label: "تسليم جزئي", icon: "inventory_2" },
     DELIVERED: { color: "success", label: "تم التسليم", icon: "done_all" },
     CANCELLED: { color: "error", label: "ملغي", icon: "cancel" },
+  };
+
+  // حماية: أي حالة مش معروفة عندنا ما تكسرش الصفحة.
+  // ملاحظة: هنا الـ color بيتبعت لـ MDTypography، فالقيم المسموحة مختلفة
+  // عن الـ Chip (مفيش "default" هنا).
+  const status = statusConfig[order?.status] || {
+    color: "dark",
+    label: order?.status || "غير معروف",
+    icon: "help",
   };
 
   return (
@@ -107,15 +126,9 @@ function OrderDetailsModal({ open, onClose, order }) {
                     </MDTypography>
                   </Grid>
                   <Grid item xs={6}>
-                    <MDTypography
-                      variant="body2"
-                      color={statusConfig[order.status]?.color}
-                      fontWeight="medium"
-                    >
-                      <Icon sx={{ fontSize: "1rem", mr: 0.5 }}>
-                        {statusConfig[order.status]?.icon}
-                      </Icon>
-                      {statusConfig[order.status]?.label}
+                    <MDTypography variant="body2" color={status.color} fontWeight="medium">
+                      <Icon sx={{ fontSize: "1rem", mr: 0.5 }}>{status.icon}</Icon>
+                      {status.label}
                     </MDTypography>
                   </Grid>
 
@@ -207,55 +220,204 @@ function OrderDetailsModal({ open, onClose, order }) {
             <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
               العناصر المطلوبة ({order.items?.length || 0})
             </MDTypography>
-            {order.items?.map((item, index) => (
+            {order.items?.map((item, index) => {
+              // الـ backend بيبعت الصورة الرئيسية بس (isPrimary, take:1)،
+              // فممكن تجيب مصفوفة فاضية لو المنتج مالوش صورة رئيسية.
+              const productImages = item.variant?.product?.images || [];
+              const primaryImage = productImages.find((img) => img.isPrimary) || productImages[0];
+              const imageUrl = getImageUrl(primaryImage?.path);
+              const productName = item.variant?.product?.name || "منتج";
+
+              return (
+                <MDBox
+                  key={item.id}
+                  p={2}
+                  mb={1}
+                  sx={{
+                    backgroundColor: darkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                    borderRadius: 1,
+                    border: "1px solid",
+                    borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                  }}
+                >
+                  <Grid container spacing={2} alignItems="center">
+                    {/* صورة المنتج */}
+                    <Grid item xs={3} sm={1}>
+                      <MDBox
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        width={{ xs: 56, sm: 64 }}
+                        height={{ xs: 56, sm: 64 }}
+                        borderRadius="8px"
+                        sx={{
+                          backgroundColor: darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
+                          border: "1px solid",
+                          borderColor: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)",
+                          overflow: "hidden",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {imageUrl ? (
+                          <MDBox
+                            component="img"
+                            src={imageUrl}
+                            alt={productName}
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                            }}
+                            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        ) : (
+                          <Icon sx={{ fontSize: 28 }}>image</Icon>
+                        )}
+                      </MDBox>
+                    </Grid>
+                    <Grid item xs={9} sm={5}>
+                      <MDTypography
+                        variant="body1"
+                        fontWeight="medium"
+                        color={darkMode ? "white" : "dark"}
+                      >
+                        {productName}
+                      </MDTypography>
+                      <MDTypography variant="caption" color={darkMode ? "white" : "dark"}>
+                        {item.variant?.option1 && `${item.variant.option1}`}
+                        {item.variant?.option2 && ` • ${item.variant.option2}`}
+                      </MDTypography>
+                    </Grid>
+                    <Grid item xs={6} sm={2}>
+                      <MDTypography variant="body2" color={darkMode ? "white" : "dark"}>
+                        الكمية: {item.qty}
+                      </MDTypography>
+                    </Grid>
+                    <Grid item xs={6} sm={2}>
+                      <MDTypography variant="body2" color={darkMode ? "white" : "dark"}>
+                        السعر: {formatPrice(item.unitPriceCents)}
+                      </MDTypography>
+                    </Grid>
+                    <Grid item xs={12} sm={2}>
+                      <MDTypography
+                        variant="body2"
+                        fontWeight="bold"
+                        color={darkMode ? "white" : "dark"}
+                      >
+                        {/* ⚠ lineTotalCents مش unitPriceCents * qty — الأول
+                            بعد الخصم والتاني قبله. استعملنا الأول باش
+                            المجموع يطلع زي الإجمالي النهائي فعلاً. */}
+                        المجموع:{" "}
+                        {formatPrice(item.lineTotalCents ?? item.unitPriceCents * item.qty)}
+                      </MDTypography>
+                    </Grid>
+                  </Grid>
+
+                  {/* Phase 4: تفاصيل التسليم الجزئي لكل بند */}
+                  {(item.deliveredQty > 0 || item.returnedQty > 0) && (
+                    <MDBox display="flex" gap={1} mt={1}>
+                      {item.deliveredQty > 0 && (
+                        <MDBadge
+                          badgeContent={`سلّم ${item.deliveredQty}`}
+                          color="success"
+                          variant="gradient"
+                        />
+                      )}
+                      {item.returnedQty > 0 && (
+                        <MDBadge
+                          badgeContent={`رجع ${item.returnedQty}`}
+                          color="error"
+                          variant="gradient"
+                        />
+                      )}
+                    </MDBox>
+                  )}
+                </MDBox>
+              );
+            })}
+          </Grid>
+
+          {/* Phase 4: ملخّص التسليم الجزئي — يظهر غير لما يكون في تسليم فعلي */}
+          {order.partiallyDeliveredAt && (
+            <Grid item xs={12}>
+              <Divider
+                sx={{ borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)" }}
+              />
               <MDBox
-                key={item.id}
+                mt={2}
                 p={2}
-                mb={1}
+                borderRadius={1}
                 sx={{
-                  backgroundColor: darkMode ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-                  borderRadius: 1,
+                  backgroundColor: darkMode ? "rgba(255,255,255,0.04)" : "#f8f9fa",
                   border: "1px solid",
-                  borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                  borderColor:
+                    order.status === "PARTIALLY_DELIVERED" ? "warning.main" : "success.main",
                 }}
               >
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} sm={6}>
+                <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
+                  {order.status === "PARTIALLY_DELIVERED" ? "تسليم جزئي" : "ملخّص التسليم"}
+                </MDTypography>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={6} sm={3}>
                     <MDTypography
-                      variant="body1"
-                      fontWeight="medium"
+                      variant="caption"
                       color={darkMode ? "white" : "dark"}
+                      display="block"
                     >
-                      {item.variant?.product?.name}
+                      إجمالي الطلب
                     </MDTypography>
-                    <MDTypography variant="caption" color={darkMode ? "white" : "dark"}>
-                      {item.variant?.option1 && `${item.variant.option1}`}
-                      {item.variant?.option2 && ` • ${item.variant.option2}`}
-                    </MDTypography>
-                  </Grid>
-                  <Grid item xs={6} sm={2}>
-                    <MDTypography variant="body2" color={darkMode ? "white" : "dark"}>
-                      الكمية: {item.qty}
+                    <MDTypography variant="h6" color={darkMode ? "white" : "dark"}>
+                      {formatPrice(order.totalCents)}
                     </MDTypography>
                   </Grid>
-                  <Grid item xs={6} sm={2}>
-                    <MDTypography variant="body2" color={darkMode ? "white" : "dark"}>
-                      السعر: {formatPrice(item.unitPriceCents)}
+                  <Grid item xs={6} sm={3}>
+                    <MDTypography variant="caption" color="success" display="block">
+                      المبلغ المقبوض فعلياً
+                    </MDTypography>
+                    <MDTypography variant="h6" color="success">
+                      {formatPrice(order.collectedCents ?? 0)}
                     </MDTypography>
                   </Grid>
-                  <Grid item xs={12} sm={2}>
+                  <Grid item xs={6} sm={3}>
+                    <MDTypography variant="caption" color="error" display="block">
+                      الفرق (مش مقبوض)
+                    </MDTypography>
+                    <MDTypography variant="h6" color="error">
+                      {formatPrice(
+                        Math.max(0, (order.totalCents ?? 0) - (order.collectedCents ?? 0))
+                      )}
+                    </MDTypography>
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
                     <MDTypography
-                      variant="body2"
-                      fontWeight="bold"
+                      variant="caption"
                       color={darkMode ? "white" : "dark"}
+                      display="block"
                     >
-                      المجموع: {formatPrice(item.unitPriceCents * item.qty)}
+                      وقت التسليم
+                    </MDTypography>
+                    <MDTypography variant="body2" color={darkMode ? "white" : "dark"}>
+                      {new Date(order.partiallyDeliveredAt).toLocaleString("ar-EG")}
                     </MDTypography>
                   </Grid>
                 </Grid>
+
+                {order.returnReason && (
+                  <MDBox mt={2}>
+                    <MDTypography
+                      variant="caption"
+                      color={darkMode ? "white" : "dark"}
+                      display="block"
+                    >
+                      سبب رجوع البضاعة
+                    </MDTypography>
+                    <MDTypography variant="body2" color={darkMode ? "white" : "dark"}>
+                      {order.returnReason}
+                    </MDTypography>
+                  </MDBox>
+                )}
               </MDBox>
-            ))}
-          </Grid>
+            </Grid>
+          )}
 
           {/* الإجمالي النهائي */}
           <Grid item xs={12}>
@@ -297,6 +459,9 @@ OrderDetailsModal.propTypes = {
     orderNumber: PropTypes.string,
     status: PropTypes.string,
     totalCents: PropTypes.number,
+    collectedCents: PropTypes.number,
+    returnReason: PropTypes.string,
+    partiallyDeliveredAt: PropTypes.string,
     createdAt: PropTypes.string,
     shippingName: PropTypes.string,
     shippingPhone: PropTypes.string,
@@ -311,11 +476,21 @@ OrderDetailsModal.propTypes = {
         id: PropTypes.number,
         qty: PropTypes.number,
         unitPriceCents: PropTypes.number,
+        lineTotalCents: PropTypes.number,
+        deliveredQty: PropTypes.number,
+        returnedQty: PropTypes.number,
         variant: PropTypes.shape({
           option1: PropTypes.string,
           option2: PropTypes.string,
           product: PropTypes.shape({
             name: PropTypes.string,
+            images: PropTypes.arrayOf(
+              PropTypes.shape({
+                id: PropTypes.number,
+                path: PropTypes.string,
+                isPrimary: PropTypes.bool,
+              })
+            ),
           }),
         }),
       })

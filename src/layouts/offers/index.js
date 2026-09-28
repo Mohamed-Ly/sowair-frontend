@@ -5,6 +5,7 @@
 */
 
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 // @mui material components
 import Grid from "@mui/material/Grid";
@@ -217,42 +218,7 @@ function Offers() {
   };
 
   // دوال المساعدة
-  const getOfferTypeText = (type) => {
-    const types = {
-      DISCOUNT_PERCENTAGE: "خصم نسبي",
-      DISCOUNT_AMOUNT: "خصم مبلغ",
-      BUY_ONE_GET_ONE: "اشتري واحد واحصل على الآخر",
-      FREE_SHIPPING: "شحن مجاني",
-      SPECIAL_OFFER: "عرض خاص",
-    };
-    return types[type] || type;
-  };
-
-  const getTargetText = (target) => {
-    const targets = {
-      ALL_PRODUCTS: "جميع المنتجات",
-      SPECIFIC_PRODUCTS: "منتجات محددة",
-      SPECIFIC_CATEGORIES: "تصنيفات محددة",
-      SPECIFIC_BRANDS: "ماركات محددة",
-    };
-    return targets[target] || target;
-  };
-
-  const getDiscountText = (offer) => {
-    switch (offer.offerType) {
-      case "DISCOUNT_PERCENTAGE":
-        return `${offer.discountPercentage}%`;
-      case "DISCOUNT_AMOUNT":
-        return `${Number(offer.discountAmount).toLocaleString("ar-LY")} د.ل`;
-      case "BUY_ONE_GET_ONE":
-        return "2x1";
-      case "FREE_SHIPPING":
-        return "شحن مجاني";
-      default:
-        return "عرض خاص";
-    }
-  };
-
+  // العرض بانر للعرض فقط: مفيش نوع خصم ولا هدف ولا بنود مرتبطة.
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("ar-LY");
   };
@@ -439,42 +405,6 @@ function Offers() {
                                 py: 2,
                               }}
                             >
-                              نوع العرض
-                            </TableCell>
-                            <TableCell
-                              sx={{
-                                width: "15%",
-                                textAlign: "center",
-                                fontWeight: "bold",
-                                fontSize: "0.875rem",
-                                color: darkMode ? "text.main" : "text.primary",
-                                py: 2,
-                              }}
-                            >
-                              الهدف
-                            </TableCell>
-                            <TableCell
-                              sx={{
-                                width: "15%",
-                                textAlign: "center",
-                                fontWeight: "bold",
-                                fontSize: "0.875rem",
-                                color: darkMode ? "text.main" : "text.primary",
-                                py: 2,
-                              }}
-                            >
-                              الخصم
-                            </TableCell>
-                            <TableCell
-                              sx={{
-                                width: "15%",
-                                textAlign: "center",
-                                fontWeight: "bold",
-                                fontSize: "0.875rem",
-                                color: darkMode ? "text.main" : "text.primary",
-                                py: 2,
-                              }}
-                            >
                               الفترة
                             </TableCell>
                             <TableCell
@@ -542,38 +472,6 @@ function Offers() {
                                       : offer.description}
                                   </MDTypography>
                                 )}
-                              </TableCell>
-                              <TableCell style={{ textAlign: "center" }}>
-                                <MDTypography variant="button" fontWeight="medium">
-                                  {getOfferTypeText(offer.offerType)}
-                                </MDTypography>
-                              </TableCell>
-                              <TableCell style={{ textAlign: "center" }}>
-                                <MDTypography variant="button" fontWeight="medium">
-                                  {getTargetText(offer.target)}
-                                </MDTypography>
-                              </TableCell>
-                              <TableCell style={{ textAlign: "center" }}>
-                                <MDBox
-                                  sx={{
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    px: 1.5,
-                                    py: 0.5,
-                                    borderRadius: "6px",
-                                    backgroundColor: darkMode
-                                      ? "rgba(33,150,243,0.15)"
-                                      : "rgba(33,150,243,0.1)",
-                                    border: "1px solid",
-                                    borderColor: darkMode
-                                      ? "rgba(33,150,243,0.3)"
-                                      : "rgba(33,150,243,0.2)",
-                                  }}
-                                >
-                                  <MDTypography variant="caption" fontWeight="bold" color="info">
-                                    {getDiscountText(offer)}
-                                  </MDTypography>
-                                </MDBox>
                               </TableCell>
                               <TableCell style={{ textAlign: "center" }}>
                                 <MDBox>

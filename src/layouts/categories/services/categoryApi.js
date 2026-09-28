@@ -28,8 +28,7 @@ export const categoryApi = {
   getCategory: (id) => api.get(`/categories/${id}`),
 
   // إنشاء تصنيف جديد
-  createCategory: (data) =>
-    api.post("/categories", categorySubmitData(data), submitConfig(data)),
+  createCategory: (data) => api.post("/categories", categorySubmitData(data), submitConfig(data)),
 
   // تحديث تصنيف
   updateCategory: (id, data) =>

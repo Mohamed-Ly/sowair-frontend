@@ -14,35 +14,6 @@ function DeleteOfferModal({ open, onClose, onConfirm, offer }) {
     onConfirm();
   };
 
-  const getDiscountText = () => {
-    if (!offer) return "";
-
-    switch (offer.offerType) {
-      case "DISCOUNT_PERCENTAGE":
-        return `${offer.discountPercentage}%`;
-      case "DISCOUNT_AMOUNT":
-        return `${(offer.discountAmount / 100).toFixed(2)} د.ل`;
-      case "BUY_ONE_GET_ONE":
-        return "2x1";
-      case "FREE_SHIPPING":
-        return "شحن مجاني";
-      default:
-        return "عرض خاص";
-    }
-  };
-
-  const getTargetText = () => {
-    if (!offer) return "";
-
-    const targets = {
-      ALL_PRODUCTS: "جميع المنتجات",
-      SPECIFIC_PRODUCTS: "منتجات محددة",
-      SPECIFIC_CATEGORIES: "تصنيفات محددة",
-      SPECIFIC_BRANDS: "ماركات محددة",
-    };
-    return targets[offer.target] || offer.target;
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return "";
     return new Date(dateString).toLocaleDateString("ar-LY", {
@@ -104,24 +75,6 @@ function DeleteOfferModal({ open, onClose, onConfirm, offer }) {
 
             <Box sx={{ mb: 2 }}>
               <MDTypography variant="caption" color="text" fontWeight="medium">
-                نوع العرض:
-              </MDTypography>
-              <MDTypography variant="body2" sx={{ ml: 1 }}>
-                {getDiscountText()}
-              </MDTypography>
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <MDTypography variant="caption" color="text" fontWeight="medium">
-                الهدف:
-              </MDTypography>
-              <MDTypography variant="body2" sx={{ ml: 1 }}>
-                {getTargetText()}
-              </MDTypography>
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <MDTypography variant="caption" color="text" fontWeight="medium">
                 الفترة:
               </MDTypography>
               <MDTypography variant="body2" sx={{ ml: 1 }}>
@@ -169,10 +122,6 @@ DeleteOfferModal.propTypes = {
   offer: PropTypes.shape({
     id: PropTypes.number,
     title: PropTypes.string,
-    offerType: PropTypes.string,
-    target: PropTypes.string,
-    discountPercentage: PropTypes.number,
-    discountAmount: PropTypes.number,
     startDate: PropTypes.string,
     endDate: PropTypes.string,
     clickCount: PropTypes.number,

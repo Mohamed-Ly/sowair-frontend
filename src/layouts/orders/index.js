@@ -86,9 +86,20 @@ function Orders() {
     PENDING: { color: "warning", label: "قيد المراجعة", icon: "schedule" },
     CONFIRMED: { color: "info", label: "مؤكد", icon: "check_circle" },
     SHIPPING: { color: "primary", label: "قيد الشحن", icon: "local_shipping" },
+    // ملاحظة: color لازم يكون مفتاح موجود في theme.palette
+    // (primary/secondary/info/success/warning/error). "dark" موجود في
+    // gradients و coloredShadows بس، فبيخلي الـ Chip يفتح decomposeColor(undefined)
+    // والصفحة تفتح يرمي error عند وجود طلب مسلّم جزئياً.
+    PARTIALLY_DELIVERED: { color: "secondary", label: "تسليم جزئي", icon: "inventory_2" },
     DELIVERED: { color: "success", label: "تم التسليم", icon: "done_all" },
     CANCELLED: { color: "error", label: "ملغي", icon: "cancel" },
   };
+
+  // حماية: لو الباك إند رجّع حالة مش معروفة (أو status ناقص)، ما نمرّرش
+  // color مش موجود في theme.palette للـ Chip — كان بيسبّب
+  // "Cannot read properties of undefined (reading 'type')" ويوقّف الصفحة كلها.
+  const UNKNOWN_STATUS = { color: "default", label: "غير معروف", icon: "help" };
+  const statusOf = (order) => statusConfig[order?.status] || UNKNOWN_STATUS;
 
   // Set RTL direction
   useEffect(() => {
@@ -323,6 +334,7 @@ function Orders() {
                     <MenuItem value="PENDING">قيد المراجعة</MenuItem>
                     <MenuItem value="CONFIRMED">مؤكد</MenuItem>
                     <MenuItem value="SHIPPING">قيد الشحن</MenuItem>
+                    <MenuItem value="PARTIALLY_DELIVERED">تسليم جزئي</MenuItem>
                     <MenuItem value="DELIVERED">تم التسليم</MenuItem>
                     <MenuItem value="CANCELLED">ملغي</MenuItem>
                   </Select>
@@ -474,9 +486,9 @@ function Orders() {
                               </TableCell>
                               <TableCell sx={{ textAlign: "center" }}>
                                 <Chip
-                                  icon={<Icon>{statusConfig[order.status]?.icon}</Icon>}
-                                  label={statusConfig[order.status]?.label}
-                                  color={statusConfig[order.status]?.color}
+                                  icon={<Icon>{statusOf(order).icon}</Icon>}
+                                  label={statusOf(order).label}
+                                  color={statusOf(order).color}
                                   variant="filled"
                                   size="small"
                                 />

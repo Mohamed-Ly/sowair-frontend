@@ -10,12 +10,15 @@ import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
 import Categories from "layouts/categories";
 import Brands from "layouts/brands";
+import Suppliers from "layouts/suppliers";
 import Products from "layouts/products";
 import ProductVariants from "layouts/variants";
 import Orders from "layouts/orders";
 import Users from "layouts/users";
 import Offers from "layouts/offers";
 import Reports from "layouts/reports";
+import Profitability from "layouts/profitability";
+import Locations from "layouts/locations";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -73,6 +76,14 @@ const routes = [
     route: "/categories",
     component: <Categories />,
   },
+  {
+    type: "collapse",
+    name: "الموردين",
+    key: "suppliers",
+    icon: <Icon fontSize="small">local_shipping</Icon>,
+    route: "/suppliers",
+    component: <Suppliers />,
+  },
 
   {
     type: "divider",
@@ -110,6 +121,22 @@ const routes = [
     icon: <Icon fontSize="small">insert_chart</Icon>,
     route: "/reports",
     component: <Reports />,
+  },
+  {
+    type: "collapse",
+    name: "الأرباح والمخزون",
+    key: "profitability",
+    icon: <Icon fontSize="small">trending_up</Icon>,
+    route: "/profitability",
+    component: <Profitability />,
+  },
+  {
+    type: "collapse",
+    name: "المدن والمناطق",
+    key: "locations",
+    icon: <Icon fontSize="small">location_on</Icon>,
+    route: "/locations",
+    component: <Locations />,
   },
 
   {

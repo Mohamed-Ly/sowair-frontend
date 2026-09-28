@@ -47,6 +47,7 @@ import { useMaterialUIController, setDirection } from "context";
 // API services
 import variantApi from "./services/variantApi";
 import productApi from "../products/services/productApi";
+import supplierApi from "../suppliers/services/supplierApi";
 
 // Components
 import CreateVariantModal from "./components/CreateVariantModal";
@@ -63,6 +64,9 @@ function ProductVariants() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
+
+  // الموردون — تُستخدم في قائمة اختيار المورد بنموذج إضافة/تعديل المتغير
+  const [suppliers, setSuppliers] = useState([]);
 
   // باقي الـ states
   const [variants, setVariants] = useState([]);
@@ -87,6 +91,20 @@ function ProductVariants() {
     setDirection(dispatch, "rtl");
     return () => setDirection(dispatch, "ltr");
   }, [dispatch]);
+
+  // تحميل قائمة الموردين مرة واحدة
+  useEffect(() => {
+    supplierApi
+      .getAllSuppliers({ limit: 100, isActive: true })
+      .then((res) => {
+        const d = res.data?.data || res.data;
+        setSuppliers(d?.items || []);
+      })
+      .catch((err) => {
+        console.error("❌ Error fetching suppliers for variant form:", err);
+        setSuppliers([]);
+      });
+  }, []);
 
   // جلب قائمة المنتجات
   const fetchProducts = async () => {
@@ -910,6 +928,7 @@ function ProductVariants() {
         onClose={() => setCreateModalOpen(false)}
         onSubmit={handleCreateVariant}
         product={selectedProduct}
+        suppliers={suppliers}
         disabled={!selectedProduct}
       />
 
@@ -921,6 +940,7 @@ function ProductVariants() {
         }}
         onSubmit={handleEditVariant}
         variant={selectedVariant}
+        suppliers={suppliers}
       />
 
       <DeleteVariantModal

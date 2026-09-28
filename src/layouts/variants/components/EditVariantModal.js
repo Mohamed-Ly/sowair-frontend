@@ -12,6 +12,7 @@ import {
   FormControlLabel,
   Switch,
   Grid,
+  MenuItem,
 } from "@mui/material";
 import Icon from "@mui/material/Icon";
 
@@ -23,7 +24,7 @@ import MDButton from "components/MDButton";
 // Context
 import { useMaterialUIController } from "context";
 
-function EditVariantModal({ open, onClose, onSubmit, variant }) {
+function EditVariantModal({ open, onClose, onSubmit, variant, suppliers = [] }) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
 
@@ -34,6 +35,8 @@ function EditVariantModal({ open, onClose, onSubmit, variant }) {
     stockQty: "",
     sku: "",
     barcode: "",
+    costCents: "",
+    supplierId: "",
     isActive: true,
   });
   const [errors, setErrors] = useState({});
@@ -48,6 +51,8 @@ function EditVariantModal({ open, onClose, onSubmit, variant }) {
         stockQty: variant.stockQty?.toString() || "",
         sku: variant.sku || "",
         // barcode: variant.barcode || "",
+        costCents: variant.costCents != null ? (variant.costCents / 100).toString() : "",
+        supplierId: variant.supplierId ? variant.supplierId.toString() : "",
         isActive: variant.isActive ?? true,
       });
     }
@@ -84,6 +89,15 @@ function EditVariantModal({ open, onClose, onSubmit, variant }) {
       newErrors.option2 = "الخيار الثاني غير صالح";
     }
 
+    // سعر الشراء اختياري، لكن لو اتدخل لازم يكون 0 أو أكبر
+    if (
+      formData.costCents !== "" &&
+      formData.costCents !== null &&
+      Number(formData.costCents) < 0
+    ) {
+      newErrors.costCents = "سعر الشراء يجب أن يكون 0 أو أكبر";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -103,6 +117,11 @@ function EditVariantModal({ open, onClose, onSubmit, variant }) {
         option2: formData.option2 || null,
         sku: formData.sku || null,
         // barcode: formData.barcode || null,
+        costCents:
+          formData.costCents === "" || formData.costCents === null
+            ? null
+            : parseFloat(formData.costCents) * 100,
+        supplierId: formData.supplierId ? parseInt(formData.supplierId) : null,
       };
 
       await onSubmit(submitData);
@@ -121,11 +140,25 @@ function EditVariantModal({ open, onClose, onSubmit, variant }) {
       stockQty: "",
       sku: "",
       // barcode: "",
+      costCents: "",
+      supplierId: "",
       isActive: true,
     });
     setErrors({});
     onClose();
   };
+
+  // تنبيه: سعر الشراء أعلى من سعر البيع يعني خسارة
+  const priceNum = parseFloat(formData.priceCents);
+  const costNum = parseFloat(formData.costCents);
+  const costHint =
+    formData.costCents === "" || Number.isNaN(costNum)
+      ? "اتركه فارغاً إن ما تعرفش التكلفة — الربح مش هيتحسب لهذا المنتج"
+      : priceNum > 0 && costNum >= priceNum
+      ? "تحذير: سعر الشراء أكبر من سعر البيع — هذا المنتج بيخسر"
+      : priceNum > 0 && costNum > 0
+      ? `الربح المتوقع للوحدة: ${(priceNum - costNum).toFixed(2)} د.ل`
+      : "";
 
   if (!variant) return null;
 
@@ -269,6 +302,75 @@ function EditVariantModal({ open, onClose, onSubmit, variant }) {
               />
             </Grid>
 
+            {/* سعر الشراء */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="سعر الشراء (دينار)"
+                name="costCents"
+                type="number"
+                value={formData.costCents}
+                onChange={handleChange}
+                error={!!errors.costCents}
+                helperText={errors.costCents || costHint}
+                disabled={loading}
+                InputProps={{
+                  endAdornment: <MDTypography variant="button">د.ل</MDTypography>,
+                }}
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: darkMode ? "text.main" : "text.primary",
+                  },
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
+                    },
+                  },
+                }}
+              />
+            </Grid>
+
+            {/* المورد */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                select
+                label="المورد"
+                name="supplierId"
+                value={formData.supplierId}
+                onChange={handleChange}
+                error={!!errors.supplierId}
+                helperText={errors.supplierId}
+                disabled={loading}
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  "& .MuiInputLabel-root": {
+                    color: darkMode ? "text.main" : "text.primary",
+                  },
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: darkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="">
+                  <em>بدون مورد</em>
+                </MenuItem>
+                {suppliers.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
             {/* SKU */}
             <Grid item xs={12} md={12}>
               <TextField
@@ -387,6 +489,7 @@ EditVariantModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   variant: PropTypes.object,
+  suppliers: PropTypes.array,
 };
 
 export default EditVariantModal;

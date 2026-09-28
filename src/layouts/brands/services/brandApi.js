@@ -28,12 +28,10 @@ export const brandApi = {
   getBrand: (id) => api.get(`/brands/${id}`),
 
   // إنشاء ماركة جديدة
-  createBrand: (data) =>
-    api.post("/brands", brandSubmitData(data), submitConfig(data)),
+  createBrand: (data) => api.post("/brands", brandSubmitData(data), submitConfig(data)),
 
   // تحديث ماركة
-  updateBrand: (id, data) =>
-    api.patch(`/brands/${id}`, brandSubmitData(data), submitConfig(data)),
+  updateBrand: (id, data) => api.patch(`/brands/${id}`, brandSubmitData(data), submitConfig(data)),
 
   // حذف ماركة
   deleteBrand: (id) => api.delete(`/brands/${id}`),
