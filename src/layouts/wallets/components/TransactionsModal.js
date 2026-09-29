@@ -27,8 +27,8 @@ import walletApi from "../services/walletApi";
 import { useMaterialUIController } from "context";
 
 const TYPE_META = {
-  EARNING: { label: "عمولة توصيل", icon: "add_circle", color: "success" },
-  SETTLEMENT: { label: "صرف رصيد", icon: "remove_circle", color: "error" },
+  EARNING: { label: "عهدة متحصلة", icon: "add_circle", color: "success" },
+  SETTLEMENT: { label: "تسليم عهدة", icon: "remove_circle", color: "error" },
   ADJUSTMENT: { label: "تصحيح يدوي", icon: "tune", color: "warning" },
 };
 
@@ -91,7 +91,7 @@ function TransactionsModal({ open, onClose, courier }) {
           </MDButton>
         </MDBox>
         <MDTypography variant="button" color="text">
-          الرصيد الحالي: <b>{(courier?.wallet?.balanceCents || 0) / 100} د.ل</b>
+          العهدة الحالية: <b>{Math.round((courier?.wallet?.balanceCents || 0) / 100)} د.ل</b>
         </MDTypography>
       </DialogTitle>
 

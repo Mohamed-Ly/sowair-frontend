@@ -107,7 +107,7 @@ function Wallets() {
   const handleSettle = async (data) => {
     await walletApi.settleWallet(selectedCourier.courierId, data);
     await fetchWallets();
-    showMessage(`تم صرف ${formatMoney(data.amountCents)} د.ل من رصيد ${selectedCourier.name}`);
+    showMessage(`تم تحصيل ${formatMoney(data.amountCents)} د.ل من عهدة ${selectedCourier.name}`);
   };
 
   const handleAdjust = async (data) => {
@@ -208,16 +208,13 @@ function Wallets() {
                             المحصّل (د.ل)
                           </TableCell>
                           <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                            إجمالي العمولة
+                            مسلَّم للمتجر
                           </TableCell>
                           <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                            منصرف
+                            العهدة المتبقية (د.ل)
                           </TableCell>
                           <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                            الرصيد الحالي (د.ل)
-                          </TableCell>
-                          <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
-                            آخر صرف
+                            آخر تسليم
                           </TableCell>
                           <TableCell sx={{ textAlign: "center", fontWeight: "bold" }}>
                             الإجراءات
@@ -265,12 +262,7 @@ function Wallets() {
                             </TableCell>
                             <TableCell style={{ textAlign: "center" }}>
                               <MDTypography variant="button">
-                                {formatMoney(w.wallet?.earnedCents || 0)}
-                              </MDTypography>
-                            </TableCell>
-                            <TableCell style={{ textAlign: "center" }}>
-                              <MDTypography variant="button" color="error">
-                                {formatMoney(w.wallet?.settledCents || 0)}
+                                {formatMoney(Math.abs(w.wallet?.settledCents || 0))}
                               </MDTypography>
                             </TableCell>
                             <TableCell style={{ textAlign: "center" }}>
@@ -316,7 +308,7 @@ function Wallets() {
                                     <Icon fontSize="small">history</Icon>
                                   </IconButton>
                                 </Tooltip>
-                                <Tooltip title="صرف رصيد">
+                                <Tooltip title="تحصيل عهدة">
                                   <span>
                                     <IconButton
                                       color="success"

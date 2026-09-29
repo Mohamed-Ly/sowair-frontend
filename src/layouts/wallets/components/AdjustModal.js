@@ -71,7 +71,8 @@ function AdjustModal({ open, onClose, onSubmit, courier }) {
     }
     const amountCents = Math.round(din * 100);
     if (direction === "REMOVE" && amountCents > balanceCents) {
-      setError(`الرصيد الحالي ${Math.round(balanceCents / 100)} د.ل فقط — لا يمكن الخصم أكثر منه`);
+      const balDin = Math.round(balanceCents / 100);
+      setError(`لا يمكن الخصم — العهدة الحالية ${balDin} د.ل`);
       return;
     }
 
@@ -106,7 +107,7 @@ function AdjustModal({ open, onClose, onSubmit, courier }) {
           تصحيح يدوي — {courier?.name || ""}
         </MDTypography>
         <MDTypography variant="button" color="text">
-          الرصيد الحالي: <b>{Math.round(balanceCents / 100)} د.ل</b>
+          العهدة الحالية: <b>{Math.round(balanceCents / 100)} د.ل</b>
         </MDTypography>
       </DialogTitle>
 

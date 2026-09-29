@@ -71,7 +71,9 @@ function SettleModal({ open, onClose, onSubmit, courier }) {
     }
     const amountCents = Math.round(din * 100);
     if (amountCents > balanceCents) {
-      setError(`الرصيد الحالي ${Math.round(balanceCents / 100)} د.ل فقط — لا يمكن الصرف أكثر منه`);
+      setError(
+        `العهدة الحالية ${Math.round(balanceCents / 100)} د.ل فقط — لا يمكن التحصيل أكثر منها`
+      );
       return;
     }
 
@@ -103,10 +105,10 @@ function SettleModal({ open, onClose, onSubmit, courier }) {
     >
       <DialogTitle>
         <MDTypography variant="h5" fontWeight="medium" color={darkMode ? "white" : "dark"}>
-          صرف رصيد — {courier?.name || ""}
+          تحصيل عهدة — {courier?.name || ""}
         </MDTypography>
         <MDTypography variant="button" color="text">
-          الرصيد الحالي: <b>{Math.round(balanceCents / 100)} د.ل</b>
+          العهدة الحالية: <b>{Math.round(balanceCents / 100)} د.ل</b>
         </MDTypography>
       </DialogTitle>
 
@@ -129,7 +131,7 @@ function SettleModal({ open, onClose, onSubmit, courier }) {
               <TextField
                 fullWidth
                 select
-                label="طريقة الصرف"
+                label="طريقة التحصيل"
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
                 disabled={loading}
@@ -180,7 +182,7 @@ function SettleModal({ open, onClose, onSubmit, courier }) {
             )
           }
         >
-          {loading ? "جاري الصرف..." : "صرف الآن"}
+          {loading ? "جاري التحصيل..." : "تحصيل الآن"}
         </MDButton>
         <MDButton variant="gradient" color="light" onClick={onClose} disabled={loading}>
           إلغاء
