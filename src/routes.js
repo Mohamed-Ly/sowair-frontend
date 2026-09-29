@@ -19,6 +19,7 @@ import Offers from "layouts/offers";
 import Reports from "layouts/reports";
 import Profitability from "layouts/profitability";
 import Locations from "layouts/locations";
+import Wallets from "layouts/wallets";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -113,6 +114,14 @@ const routes = [
     icon: <Icon fontSize="small">group</Icon>,
     route: "/users",
     component: <Users />,
+  },
+  {
+    type: "collapse",
+    name: "المندوبون والمحافظ",
+    key: "wallets",
+    icon: <Icon fontSize="small">account_balance_wallet</Icon>,
+    route: "/wallets",
+    component: <Wallets />,
   },
   {
     type: "collapse",
