@@ -42,8 +42,8 @@ import profitabilityApi from "./services/profitabilityApi";
 function formatMoney(cents) {
   if (cents === null || cents === undefined) return "—";
   return (cents / 100).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 }
 

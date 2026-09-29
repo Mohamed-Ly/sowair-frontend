@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Dialog, DialogContent, Box } from "@mui/material";
+import { Dialog, DialogContent, Box, Grid } from "@mui/material";
 import Icon from "@mui/material/Icon";
 import PropTypes from "prop-types";
 import MDBox from "components/MDBox";
@@ -12,6 +12,8 @@ function InvoicePrint({ open, onClose, order }) {
   const { darkMode } = controller;
 
   const printRef = useRef();
+  const storeName = "سوير";
+  const logoUrl = `${window.location.origin}/sowair-logo.png`;
 
   const handlePrint = () => {
     const printContent = printRef.current;
@@ -24,18 +26,30 @@ function InvoicePrint({ open, onClose, order }) {
           <style>
             body { 
               font-family: 'Arial', sans-serif; 
-              margin: 20px; 
+              margin: 0; 
+              padding: 24px;
               direction: rtl;
+              color: #333;
             }
-            .header { text-align: center; margin-bottom: 30px; }
-            .section { margin-bottom: 20px; }
-            .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: right; }
-            .table th { background-color: #f5f5f5; }
-            .total { font-size: 18px; font-weight: bold; text-align: left; margin-top: 20px; }
+            .store-logo { width: 88px; height: 88px; object-fit: contain; margin-bottom: 6px; }
+            .header { text-align: center; margin-bottom: 24px; }
+            .header .store-name { font-size: 26px; font-weight: bold; color: #5f0b28; margin: 0; }
+            .header .store-sub { font-size: 13px; color: #777; margin: 2px 0 14px; }
+            .title-row { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 14px 0 2px; }
+            .title-row h2 { font-size: 20px; color: #5f0b28; margin: 0; }
+            .invoice-meta { font-size: 12px; color: #888; }
+            .section { margin: 18px 0; }
+            .section h3 { font-size: 15px; color: #5f0b28; border-bottom: 2px solid #5f0b28; padding-bottom: 6px; margin: 0 0 10px; }
+            .section table { width: 100%; border-collapse: collapse; }
+            .section table th, .section table td { border: 1px solid #ddd; padding: 8px 10px; text-align: right; font-size: 13px; }
+            .section table th { background-color: #f7ecef; color: #5f0b28; }
+            .info-grid td { border: none !important; padding: 4px 0 !important; }
+            .total-box { margin-top: 18px; }
+            .total-line { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
+            .total-line.grand { font-size: 18px; font-weight: bold; color: #5f0b28; border-top: 2px solid #5f0b28; margin-top: 6px; padding-top: 10px; }
             @media print {
-              body { margin: 0; }
-              .no-print { display: none; }
+              body { padding: 12px; }
+              .no-print { display: none !important; }
             }
           </style>
         </head>
@@ -80,6 +94,12 @@ function InvoicePrint({ open, onClose, order }) {
     CANCELLED: "ملغي",
   };
 
+  const cityName = order.deliveryCityName || order.deliveryCity?.name || null;
+  const areaName = order.deliveryAreaName || order.deliveryArea?.name || null;
+  const hasDeliveryFee = (order.deliveryFeeCents || 0) > 0;
+  const itemSubtotal = order.totalCents || 0;
+  const grandTotal = itemSubtotal + (order.deliveryFeeCents || 0);
+
   return (
     <Dialog
       open={open}
@@ -96,69 +116,101 @@ function InvoicePrint({ open, onClose, order }) {
       <DialogContent>
         <Box ref={printRef}>
           {/* رأس الفاتورة */}
-          <Box className="header" mb={4}>
+          <Box className="header" mb={3}>
+            <img src={logoUrl} alt="شعار سوير" className="store-logo" />
+            <MDTypography variant="h4" fontWeight="bold" color="primary" sx={{ mb: 0.5 }}>
+              {storeName}
+            </MDTypography>
+            <MDTypography variant="subtitle2" color="text" display="block">
+              متجر متعدد المنتجات — عطور، تجميل، والعناية الشخصية
+            </MDTypography>
+            <Box className="title-row" mt={2}>
+              <MDTypography variant="h5" color={darkMode ? "white" : "dark"}>
+                فاتورة بيع
+              </MDTypography>
+              <MDTypography variant="h5" color="primary">
+                #{order.orderNumber}
+              </MDTypography>
+            </Box>
             <MDTypography
-              variant="h4"
-              fontWeight="bold"
-              color={darkMode ? "white" : "dark"}
-              gutterBottom
+              variant="body2"
+              color={darkMode ? "text.main" : "text.secondary"}
+              align="center"
             >
-              فاتورة بيع
-            </MDTypography>
-            <MDTypography variant="h5" color="primary">
-              #{order.orderNumber}
-            </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
               تاريخ الإصدار: {formatDate(new Date())}
             </MDTypography>
           </Box>
 
-          {/* معلومات المتجر */}
-          <Box className="section" mb={3}>
-            <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
-              معلومات المتجر
-            </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              المتجر الإلكتروني
-            </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              طرابلس - ليبيا
-            </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              هاتف: 0912345678
-            </MDTypography>
-          </Box>
+          <Grid container spacing={2}>
+            {/* معلومات المتجر */}
+            <Grid item xs={12} md={6}>
+              <Box className="section">
+                <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
+                  معلومات المتجر
+                </MDTypography>
+                <MDTypography variant="body2" color="text">
+                  <strong>الاسم:</strong> {storeName}
+                </MDTypography>
+                <MDTypography variant="body2" color="text">
+                  <strong>العنوان:</strong> طرابلس - ليبيا
+                </MDTypography>
+                <MDTypography variant="body2" color="text">
+                  <strong>الهاتف:</strong> 0912345678
+                </MDTypography>
+              </Box>
+            </Grid>
 
-          {/* معلومات العميل */}
-          <Box className="section" mb={3}>
-            <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
-              معلومات العميل
-            </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              <strong>الاسم:</strong> {order.shippingName}
-            </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              <strong>الهاتف:</strong> {order.shippingPhone}
-            </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              <strong>العنوان:</strong> {order.shippingAddress}
-            </MDTypography>
-          </Box>
+            {/* معلومات العميل */}
+            <Grid item xs={12} md={6}>
+              <Box className="section">
+                <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
+                  معلومات العميل
+                </MDTypography>
+                <MDTypography variant="body2" color="text">
+                  <strong>الاسم:</strong> {order.shippingName}
+                </MDTypography>
+                <MDTypography variant="body2" color="text">
+                  <strong>الهاتف:</strong> {order.shippingPhone}
+                </MDTypography>
+                <MDTypography variant="body2" color="text">
+                  <strong>العنوان:</strong> {order.shippingAddress}
+                </MDTypography>
+                {cityName && (
+                  <MDTypography variant="body2" color="text">
+                    <strong>المدينة:</strong> {cityName}
+                  </MDTypography>
+                )}
+                {areaName && (
+                  <MDTypography variant="body2" color="text">
+                    <strong>المنطقة:</strong> {areaName}
+                  </MDTypography>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
 
           {/* تفاصيل الطلب */}
-          <Box className="section" mb={3}>
+          <Box className="section" mb={2}>
             <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
               تفاصيل الطلب
             </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              <strong>رقم الطلب:</strong> {order.orderNumber}
-            </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              <strong>تاريخ الطلب:</strong> {formatDate(order.createdAt)}
-            </MDTypography>
-            <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-              <strong>الحالة:</strong> {statusLabels[order.status]}
-            </MDTypography>
+            <Grid container spacing={0}>
+              <Grid item xs={6}>
+                <MDTypography variant="body2" color="text">
+                  <strong>رقم الطلب:</strong> {order.orderNumber}
+                </MDTypography>
+              </Grid>
+              <Grid item xs={6}>
+                <MDTypography variant="body2" color="text">
+                  <strong>تاريخ الطلب:</strong> {formatDate(order.createdAt)}
+                </MDTypography>
+              </Grid>
+              <Grid item xs={6}>
+                <MDTypography variant="body2" color="text">
+                  <strong>الحالة:</strong> {statusLabels[order.status]}
+                </MDTypography>
+              </Grid>
+            </Grid>
           </Box>
 
           {/* جدول العناصر */}
@@ -166,7 +218,7 @@ function InvoicePrint({ open, onClose, order }) {
             <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
               العناصر المطلوبة
             </MDTypography>
-            <table className="table">
+            <table className="table" width="100%">
               <thead>
                 <tr>
                   <th>المنتج</th>
@@ -176,7 +228,7 @@ function InvoicePrint({ open, onClose, order }) {
                 </tr>
               </thead>
               <tbody>
-                {order.items?.map((item, index) => (
+                {order.items?.map((item) => (
                   <tr key={item.id}>
                     <td>
                       {item.variant?.product?.name}
@@ -193,20 +245,57 @@ function InvoicePrint({ open, onClose, order }) {
           </Box>
 
           {/* الإجمالي */}
-          <Box className="total">
-            <MDTypography variant="h5" color={darkMode ? "white" : "dark"}>
-              الإجمالي: {formatPrice(order.totalCents)}
-            </MDTypography>
+          <Box className="total-box">
+            <MDBox
+              sx={{
+                px: 2,
+                py: 1.5,
+                borderRadius: 1,
+                backgroundColor: darkMode ? "rgba(255,255,255,0.04)" : "rgba(95,11,40,0.05)",
+              }}
+            >
+              <MDBox className="total-line" display="flex" justifyContent="space-between" mb={0.5}>
+                <MDTypography variant="body1" color="text">
+                  إجمالي المنتجات
+                </MDTypography>
+                <MDTypography variant="body1" fontWeight="medium" color="text">
+                  {formatPrice(itemSubtotal)}
+                </MDTypography>
+              </MDBox>
+              {hasDeliveryFee && (
+                <MDBox
+                  className="total-line"
+                  display="flex"
+                  justifyContent="space-between"
+                  mb={0.5}
+                >
+                  <MDTypography variant="body1" color="text">
+                    رسوم التوصيل (تدفع عند الاستلام)
+                  </MDTypography>
+                  <MDTypography variant="body1" fontWeight="medium" color="text">
+                    {formatPrice(order.deliveryFeeCents)}
+                  </MDTypography>
+                </MDBox>
+              )}
+              <MDBox className="total-line grand" display="flex" justifyContent="space-between">
+                <MDTypography variant="h5" color={darkMode ? "white" : "dark"}>
+                  {hasDeliveryFee ? "المبلغ الكلي" : "الإجمالي"}
+                </MDTypography>
+                <MDTypography variant="h5" color="primary">
+                  {formatPrice(grandTotal)}
+                </MDTypography>
+              </MDBox>
+            </MDBox>
           </Box>
 
           {/* تذييل الفاتورة */}
-          <Box mt={4} pt={2} style={{ borderTop: "1px solid #ddd" }}>
+          <Box mt={4} pt={2} sx={{ borderTop: "1px solid #ddd" }}>
             <MDTypography
               variant="body2"
               align="center"
               color={darkMode ? "text.main" : "text.secondary"}
             >
-              شكراً لثقتكم بنا
+              شكراً لثقتكم بمتجر سوير
             </MDTypography>
             <MDTypography
               variant="caption"
@@ -254,10 +343,15 @@ InvoicePrint.propTypes = {
     orderNumber: PropTypes.string,
     status: PropTypes.string,
     totalCents: PropTypes.number,
+    deliveryFeeCents: PropTypes.number,
     createdAt: PropTypes.string,
     shippingName: PropTypes.string,
     shippingPhone: PropTypes.string,
     shippingAddress: PropTypes.string,
+    deliveryCityName: PropTypes.string,
+    deliveryAreaName: PropTypes.string,
+    deliveryCity: PropTypes.shape({ name: PropTypes.string }),
+    deliveryArea: PropTypes.shape({ name: PropTypes.string }),
     items: PropTypes.arrayOf(
       PropTypes.shape({
         id: PropTypes.number,

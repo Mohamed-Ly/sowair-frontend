@@ -3,7 +3,20 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
 const PerfumeLoadingElegant = () => {
-  const primaryColor = "#5f0b28"; // اللون المطلوب: العنابي الداكن الجميل
+  const primaryColor = "#5f0b28";
+
+  const productBoxes = [
+    { bg: "linear-gradient(135deg, #d9a441 0%, #b8860b 100%)", delay: "0s" },
+    { bg: "linear-gradient(135deg, #a33c5e 0%, #5f0b28 100%)", delay: "0.35s" },
+    { bg: "linear-gradient(135deg, #4a9e7f 0%, #1f6b4f 100%)", delay: "0.7s" },
+  ];
+
+  const sparkles = [
+    { top: "-26px", left: "2px", size: "8px", delay: "0s" },
+    { top: "-40px", left: "58px", size: "6px", delay: "0.6s" },
+    { top: "-14px", left: "108px", size: "7px", delay: "1.1s" },
+    { top: "34px", left: "122px", size: "5px", delay: "0.3s" },
+  ];
 
   return (
     <MDBox
@@ -17,136 +30,167 @@ const PerfumeLoadingElegant = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        // يمكن تغيير خلفية الشاشة الكاملة إذا لزم الأمر، هنا نستخدم خلفية افتراضية
-        backgroundColor: "rgba(255, 255, 255, 0.95)", // خلفية شبه شفافة بيضاء فاتحة
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
         zIndex: 9999,
-        // تأثير خفيف عند التحميل
         backdropFilter: "blur(2px)",
       }}
     >
-      {/* زجاجة العطر - بتصميم أكثر أناقة وعصري */}
       <MDBox
         sx={{
           position: "relative",
-          width: "90px",
-          height: "130px",
-          animation: "elegantFloat 2.5s ease-in-out infinite", // حركة طفو أبطأ وأكثر هدوءاً
+          width: "140px",
+          height: "150px",
+          animation: "elegantFloat 2.5s ease-in-out infinite",
           "@keyframes elegantFloat": {
             "0%, 100%": { transform: "translateY(0px)" },
-            "50%": { transform: "translateY(-18px)" },
+            "50%": { transform: "translateY(-16px)" },
           },
         }}
       >
-        {/* جسم الزجاجة الأنيق (مستطيل مع حواف مدورة خفيفة) */}
         <MDBox
           sx={{
-            position: "absolute",
-            bottom: 0,
-            left: "15px",
-            width: "60px",
-            height: "90px",
-            // تدرج لوني عميق باستخدام اللون المطلوب
-            background: `linear-gradient(180deg, ${primaryColor} 0%, #a33c5e 100%)`,
-            borderRadius: "8px", // حواف أنعم
-            boxShadow: `0 8px 30px rgba(95, 11, 40, 0.6)`, // ظل أعمق وأكثر تركيزاً
-            border: "1px solid rgba(255, 255, 255, 0.2)", // لمعة زجاجية خفيفة
-          }}
-        />
-
-        {/* قطعة الرذاذ المعدنية (Spray Nozzle) */}
-        <MDBox
-          sx={{
-            position: "absolute",
-            top: "10px",
-            left: "37px",
-            width: "16px",
-            height: "10px",
-            backgroundColor: "#A9A9A9", // لون معدني رمادي فاتح
-            borderRadius: "2px 2px 0 0",
-          }}
-        />
-
-        {/* غطاء الزجاجة (Cap) */}
-        <MDBox
-          sx={{
-            position: "absolute",
-            top: "-15px",
-            left: "30px",
-            width: "30px",
-            height: "25px",
-            backgroundColor: "#2D3748", // غطاء داكن
-            borderRadius: "6px 6px 15px 15px", // شكل غطاء عصري
-            boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
-            // خط زخرفي على الغطاء
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              bottom: "3px",
-              left: "0",
-              width: "100%",
-              height: "2px",
-              backgroundColor: "#A9A9A9",
+            "@keyframes sparklePulse": {
+              "0%, 100%": { opacity: 0, transform: "scale(0.5)" },
+              "50%": { opacity: 0.9, transform: "scale(1.1)" },
             },
           }}
         />
-
-        {/* تأثير الرذاذ/العطر المتصاعد - فقاعات متناثرة وأكثر خفة */}
-        {[1.5, 2.2, 3.0].map((duration, index) => (
+        {sparkles.map((s, index) => (
           <MDBox
             key={index}
             sx={{
               position: "absolute",
-              // تحديد أماكن الفقاعات
-              top: `${-40 - index * 15}px`,
-              left: `${40 + (index % 2 === 0 ? -10 : 10)}px`,
-              width: `${5 + index * 2}px`,
-              height: `${5 + index * 2}px`,
-              backgroundColor: `rgba(95, 11, 40, ${0.4 - index * 0.1})`, // شفافية خفيفة
+              top: s.top,
+              left: s.left,
+              width: s.size,
+              height: s.size,
+              backgroundColor: primaryColor,
               borderRadius: "50%",
-              animation: `sprayBubble ${duration}s ease-in-out infinite ${index * 0.5}s`,
-              boxShadow: `0 0 ${4 + index * 2}px rgba(95, 11, 40, 0.8)`, // توهج خفيف
+              opacity: 0,
+              animation: `sparklePulse 2s ease-in-out infinite ${s.delay}`,
             }}
           />
         ))}
 
-        {/* تعريف حركة الفقاعات (Spray) */}
         <MDBox
           sx={{
-            "@keyframes sprayBubble": {
-              "0%": {
-                transform: "translateY(0) scale(1)",
-                opacity: 0,
-              },
-              "50%": {
-                transform: "translateY(-30px) scale(1.1)",
-                opacity: 0.8,
-              },
-              "100%": {
-                transform: "translateY(-60px) scale(0.8)",
-                opacity: 0,
-              },
-            },
+            position: "absolute",
+            top: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "46px",
+            height: "34px",
+            border: "5px solid",
+            borderBottom: "none",
+            borderColor: primaryColor,
+            borderRadius: "24px 24px 0 0",
           }}
         />
+
+        <MDBox
+          sx={{
+            position: "absolute",
+            top: "24px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            alignItems: "flex-end",
+            gap: "9px",
+            "@keyframes productPop": {
+              "0%, 100%": { transform: "translateY(0) scale(1)" },
+              "50%": { transform: "translateY(-10px) scale(1.06)" },
+            },
+          }}
+        >
+          {productBoxes.map((box, index) => (
+            <MDBox key={index} sx={{ position: "relative" }}>
+              <MDBox
+                sx={{
+                  position: "absolute",
+                  top: "-7px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "18px",
+                  height: "6px",
+                  backgroundColor: "rgba(255, 255, 255, 0.85)",
+                  borderRadius: "3px",
+                  animation: `productPop 2.2s ease-in-out infinite ${box.delay}`,
+                }}
+              />
+              <MDBox
+                sx={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "8px",
+                  background: box.bg,
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+                  animation: `productPop 2.2s ease-in-out infinite ${box.delay}`,
+                }}
+              />
+            </MDBox>
+          ))}
+        </MDBox>
+
+        <MDBox
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "112px",
+            height: "92px",
+            background: `linear-gradient(180deg, ${primaryColor} 0%, #a33c5e 100%)`,
+            borderRadius: "16px",
+            boxShadow: "0 10px 30px rgba(95, 11, 40, 0.45)",
+            border: "1px solid rgba(255, 255, 255, 0.25)",
+          }}
+        >
+          <MDBox
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "74px",
+              height: "28px",
+              backgroundColor: "rgba(255, 255, 255, 0.16)",
+              borderRadius: "9px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "'Cairo', 'Arial', sans-serif",
+              fontWeight: "bold",
+              fontSize: "15px",
+              color: "#ffffff",
+              letterSpacing: "1px",
+            }}
+          >
+            سوير
+          </MDBox>
+        </MDBox>
       </MDBox>
 
-      {/* النص */}
-      {/* <MDTypography
-        variant="h5"
+      <MDTypography
+        variant="h4"
         sx={{
-          mt: 4, // زيادة المسافة عن الزجاجة
-          animation: "elegantPulse 1.8s ease-in-out infinite",
+          mt: 4,
           fontWeight: "bold",
-          color: primaryColor, // استخدام نفس لون العطر
-          letterSpacing: "1px", // زيادة تباعد الحروف قليلاً
+          color: primaryColor,
+          animation: "elegantPulse 1.8s ease-in-out infinite",
           "@keyframes elegantPulse": {
-            "0%, 100%": { opacity: 0.8, transform: "scale(1)" },
-            "50%": { opacity: 1, transform: "scale(1.05)" },
+            "0%, 100%": { opacity: 0.85, transform: "scale(1)" },
+            "50%": { opacity: 1, transform: "scale(1.04)" },
           },
         }}
       >
-        جاري تحضير العطر...
-      </MDTypography> */}
+        متجر سوير
+      </MDTypography>
+      <MDTypography variant="body2" color="text" mt={1}>
+        متجر متعدد المنتجات — عطور، تجميل، والعناية الشخصية
+      </MDTypography>
+      <MDTypography variant="button" color="text" mt={1} sx={{ opacity: 0.75 }}>
+        جاري تحميل لوحة التحكم...
+      </MDTypography>
     </MDBox>
   );
 };

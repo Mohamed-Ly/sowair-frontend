@@ -143,7 +143,7 @@ function CreateVariantModal({ open, onClose, onSubmit, product, suppliers = [] }
       : priceNum > 0 && costNum >= priceNum
       ? "تحذير: سعر الشراء أكبر من سعر البيع — هذا المنتج بيخسر"
       : priceNum > 0 && costNum > 0
-      ? `الربح المتوقع للوحدة: ${(priceNum - costNum).toFixed(2)} د.ل`
+      ? `الربح المتوقع للوحدة: ${(priceNum - costNum).toFixed(0)} د.ل`
       : "";
 
   return (

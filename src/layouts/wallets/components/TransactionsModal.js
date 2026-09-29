@@ -164,7 +164,7 @@ function TransactionsModal({ open, onClose, courier }) {
                         }}
                       >
                         {negative ? "-" : "+"}
-                        {(Math.abs(t.amountCents) / 100).toFixed(2)} د.ل
+                        {Math.round(Math.abs(t.amountCents) / 100)} د.ل
                       </TableCell>
                       <TableCell style={{ textAlign: "center" }}>
                         <MDTypography variant="caption">

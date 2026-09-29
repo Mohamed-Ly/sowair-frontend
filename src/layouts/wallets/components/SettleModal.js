@@ -71,7 +71,7 @@ function SettleModal({ open, onClose, onSubmit, courier }) {
     }
     const amountCents = Math.round(din * 100);
     if (amountCents > balanceCents) {
-      setError(`الرصيد الحالي ${(balanceCents / 100).toFixed(2)} د.ل فقط — لا يمكن الصرف أكثر منه`);
+      setError(`الرصيد الحالي ${Math.round(balanceCents / 100)} د.ل فقط — لا يمكن الصرف أكثر منه`);
       return;
     }
 
@@ -106,7 +106,7 @@ function SettleModal({ open, onClose, onSubmit, courier }) {
           صرف رصيد — {courier?.name || ""}
         </MDTypography>
         <MDTypography variant="button" color="text">
-          الرصيد الحالي: <b>{(balanceCents / 100).toFixed(2)} د.ل</b>
+          الرصيد الحالي: <b>{Math.round(balanceCents / 100)} د.ل</b>
         </MDTypography>
       </DialogTitle>
 

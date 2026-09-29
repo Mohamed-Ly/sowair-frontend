@@ -38,8 +38,8 @@ import TransactionsModal from "./components/TransactionsModal";
 
 function formatMoney(cents) {
   return (cents / 100).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 }
 
