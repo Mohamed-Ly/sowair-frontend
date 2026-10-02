@@ -12,7 +12,7 @@ function InvoicePrint({ open, onClose, order }) {
   const { darkMode } = controller;
 
   const printRef = useRef();
-  const storeName = "سوير";
+  const storeName = "متجر سوير";
   const logoUrl = `${window.location.origin}/sowair-logo.png`;
 
   const handlePrint = () => {
@@ -117,13 +117,18 @@ function InvoicePrint({ open, onClose, order }) {
         <Box ref={printRef}>
           {/* رأس الفاتورة */}
           <Box className="header" mb={3}>
-            <img src={logoUrl} alt="شعار سوير" className="store-logo" />
+            <img
+              src={logoUrl}
+              alt="شعار سوير"
+              className="store-logo"
+              style={{ width: 76, objectFit: "contain", marginBottom: 6 }}
+            />
             <MDTypography variant="h4" fontWeight="bold" color="primary" sx={{ mb: 0.5 }}>
               {storeName}
             </MDTypography>
-            <MDTypography variant="subtitle2" color="text" display="block">
+            {/* <MDTypography variant="subtitle2" color="text" display="block">
               متجر متعدد المنتجات — عطور، تجميل، والعناية الشخصية
-            </MDTypography>
+            </MDTypography> */}
             <Box className="title-row" mt={2}>
               <MDTypography variant="h5" color={darkMode ? "white" : "dark"}>
                 فاتورة بيع
@@ -142,8 +147,7 @@ function InvoicePrint({ open, onClose, order }) {
           </Box>
 
           <Grid container spacing={2}>
-            {/* معلومات المتجر */}
-            <Grid item xs={12} md={6}>
+            {/* <Grid item xs={12} md={6}>
               <Box className="section">
                 <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
                   معلومات المتجر
@@ -158,11 +162,10 @@ function InvoicePrint({ open, onClose, order }) {
                   <strong>الهاتف:</strong> 0912345678
                 </MDTypography>
               </Box>
-            </Grid>
+            </Grid> */}
 
-            {/* معلومات العميل */}
             <Grid item xs={12} md={6}>
-              <Box className="section">
+              <Box className="section" style={{ marginBottom: "30px" }}>
                 <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
                   معلومات العميل
                 </MDTypography>
@@ -189,8 +192,7 @@ function InvoicePrint({ open, onClose, order }) {
             </Grid>
           </Grid>
 
-          {/* تفاصيل الطلب */}
-          <Box className="section" mb={2}>
+          {/* <Box className="section" mb={2}>
             <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
               تفاصيل الطلب
             </MDTypography>
@@ -211,7 +213,7 @@ function InvoicePrint({ open, onClose, order }) {
                 </MDTypography>
               </Grid>
             </Grid>
-          </Box>
+          </Box> */}
 
           {/* جدول العناصر */}
           <Box className="section">

@@ -185,12 +185,9 @@ const PerfumeLoadingElegant = () => {
       >
         متجر سوير
       </MDTypography>
-      <MDTypography variant="body2" color="text" mt={1}>
+      {/* <MDTypography variant="body2" color="text" mt={1}>
         متجر متعدد المنتجات — عطور، تجميل، والعناية الشخصية
-      </MDTypography>
-      <MDTypography variant="button" color="text" mt={1} sx={{ opacity: 0.75 }}>
-        جاري تحميل لوحة التحكم...
-      </MDTypography>
+      </MDTypography> */}
     </MDBox>
   );
 };
