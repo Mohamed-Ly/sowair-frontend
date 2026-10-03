@@ -92,6 +92,7 @@ function InvoicePrint({ open, onClose, order }) {
   const areaName = order.deliveryAreaName || order.deliveryArea?.name || null;
   const hasDeliveryFee = (order.deliveryFeeCents || 0) > 0;
   const itemSubtotal = order.totalCents || 0;
+  const totalQty = (order.items || []).reduce((sum, item) => sum + (item.qty || 0), 0);
   const grandTotal = itemSubtotal + (order.deliveryFeeCents || 0);
 
   return (
@@ -119,6 +120,12 @@ function InvoicePrint({ open, onClose, order }) {
               <div className="receipt__number">#{order.orderNumber}</div>
               <div className="receipt__date">تاريخ الإصدار: {formatDate(new Date())}</div>
             </Box>
+
+            {/* عدد المنتجات */}
+            <div className="receipt__row">
+              <span className="k">عدد المنتجات</span>
+              <span className="v">{totalQty}</span>
+            </div>
 
             {/* معلومات العميل */}
             <div className="receipt__row">
@@ -216,6 +223,13 @@ InvoicePrint.propTypes = {
     deliveryAreaName: PropTypes.string,
     deliveryCity: PropTypes.shape({ name: PropTypes.string }),
     deliveryArea: PropTypes.shape({ name: PropTypes.string }),
+    items: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number,
+        qty: PropTypes.number,
+        unitPriceCents: PropTypes.number,
+      })
+    ),
   }),
 };
 
