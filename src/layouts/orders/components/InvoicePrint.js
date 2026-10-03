@@ -121,12 +121,6 @@ function InvoicePrint({ open, onClose, order }) {
               <div className="receipt__date">تاريخ الإصدار: {formatDate(new Date())}</div>
             </Box>
 
-            {/* عدد المنتجات */}
-            <div className="receipt__row">
-              <span className="k">عدد المنتجات</span>
-              <span className="v">{totalQty}</span>
-            </div>
-
             {/* معلومات العميل */}
             <div className="receipt__row">
               <span className="k">العميل</span>
@@ -154,6 +148,12 @@ function InvoicePrint({ open, onClose, order }) {
                 <span className="v">{areaName}</span>
               </div>
             )}
+
+            {/* عدد المنتجات */}
+            <div className="receipt__row">
+              <span className="k">عدد المنتجات</span>
+              <span className="v">{totalQty}</span>
+            </div>
 
             {/* الإجمالي */}
             <Box className="receipt__totals">
