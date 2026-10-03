@@ -1,11 +1,40 @@
-import { useRef } from "react";
-import { Dialog, DialogContent, Box, Grid } from "@mui/material";
+﻿import { useRef } from "react";
+import { Dialog, DialogContent, Box } from "@mui/material";
 import Icon from "@mui/material/Icon";
 import PropTypes from "prop-types";
-import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 import { useMaterialUIController } from "context";
+
+const receiptStyles = `
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; background: #fff; color: #1a1a1a; }
+  @page { size: 60mm auto; margin: 0; }
+
+  .receipt-paper { background: #f4f4f4; padding: 16px; border-radius: 8px; }
+  .receipt { width: 6cm; margin: 0 auto; padding: 2mm; direction: rtl; font-size: 12px; line-height: 1.5; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); border-radius: 4px; }
+
+  .receipt__header { text-align: center; border-bottom: 1.5px dashed #bbb; padding-bottom: 6px; margin-bottom: 8px; }
+  .receipt__logo { width: 56px; height: 56px; object-fit: contain; margin-bottom: 2px; }
+  .receipt__store { font-size: 15px; font-weight: 700; color: #5f0b28; }
+  .receipt__doc { font-size: 12px; font-weight: 700; margin: 2px 0 1px; }
+  .receipt__number { font-size: 12px; direction: ltr; }
+  .receipt__date { font-size: 10px; color: #666; }
+
+  .receipt__row { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed #e3e3e3; padding: 3px 0; }
+  .receipt__row .k { color: #666; white-space: nowrap; }
+  .receipt__row .v { text-align: left; word-break: break-word; }
+
+  .receipt__totals { margin-top: 8px; }
+  .receipt__grand { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; color: #5f0b28; border-top: 1.5px solid #5f0b28; margin-top: 4px; padding-top: 6px; }
+
+  .receipt__footer { text-align: center; margin-top: 10px; border-top: 1px dashed #bbb; padding-top: 6px; font-size: 10px; color: #555; }
+
+  @media print {
+    .receipt-paper { background: #fff; padding: 0; }
+    .receipt { box-shadow: none; border-radius: 0; }
+  }
+`;
 
 function InvoicePrint({ open, onClose, order }) {
   const [controller] = useMaterialUIController();
@@ -20,38 +49,11 @@ function InvoicePrint({ open, onClose, order }) {
     const printWindow = window.open("", "_blank");
 
     printWindow.document.write(`
-      <html>
+      <html lang="ar" dir="rtl">
         <head>
+          <meta charset="utf-8" />
           <title>فاتورة ${order.orderNumber}</title>
-          <style>
-            body { 
-              font-family: 'Arial', sans-serif; 
-              margin: 0; 
-              padding: 24px;
-              direction: rtl;
-              color: #333;
-            }
-            .store-logo { width: 88px; height: 88px; object-fit: contain; margin-bottom: 6px; }
-            .header { text-align: center; margin-bottom: 24px; }
-            .header .store-name { font-size: 26px; font-weight: bold; color: #5f0b28; margin: 0; }
-            .header .store-sub { font-size: 13px; color: #777; margin: 2px 0 14px; }
-            .title-row { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 14px 0 2px; }
-            .title-row h2 { font-size: 20px; color: #5f0b28; margin: 0; }
-            .invoice-meta { font-size: 12px; color: #888; }
-            .section { margin: 18px 0; }
-            .section h3 { font-size: 15px; color: #5f0b28; border-bottom: 2px solid #5f0b28; padding-bottom: 6px; margin: 0 0 10px; }
-            .section table { width: 100%; border-collapse: collapse; }
-            .section table th, .section table td { border: 1px solid #ddd; padding: 8px 10px; text-align: right; font-size: 13px; }
-            .section table th { background-color: #f7ecef; color: #5f0b28; }
-            .info-grid td { border: none !important; padding: 4px 0 !important; }
-            .total-box { margin-top: 18px; }
-            .total-line { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
-            .total-line.grand { font-size: 18px; font-weight: bold; color: #5f0b28; border-top: 2px solid #5f0b28; margin-top: 6px; padding-top: 10px; }
-            @media print {
-              body { padding: 12px; }
-              .no-print { display: none !important; }
-            }
-          </style>
+          <style>${receiptStyles}</style>
         </head>
         <body>
           ${printContent.innerHTML}
@@ -86,14 +88,6 @@ function InvoicePrint({ open, onClose, order }) {
     });
   };
 
-  const statusLabels = {
-    PENDING: "قيد المراجعة",
-    CONFIRMED: "مؤكد",
-    SHIPPING: "قيد الشحن",
-    DELIVERED: "تم التسليم",
-    CANCELLED: "ملغي",
-  };
-
   const cityName = order.deliveryCityName || order.deliveryCity?.name || null;
   const areaName = order.deliveryAreaName || order.deliveryArea?.name || null;
   const hasDeliveryFee = (order.deliveryFeeCents || 0) > 0;
@@ -114,199 +108,69 @@ function InvoicePrint({ open, onClose, order }) {
       }}
     >
       <DialogContent>
-        <Box ref={printRef}>
-          {/* رأس الفاتورة */}
-          <Box className="header" mb={3}>
-            <img
-              src={logoUrl}
-              alt="شعار سوير"
-              className="store-logo"
-              style={{ width: 76, objectFit: "contain", marginBottom: 6 }}
-            />
-            <MDTypography variant="h4" fontWeight="bold" color="primary" sx={{ mb: 0.5 }}>
-              {storeName}
-            </MDTypography>
-            {/* <MDTypography variant="subtitle2" color="text" display="block">
-              متجر متعدد المنتجات — عطور، تجميل، والعناية الشخصية
-            </MDTypography> */}
-            <Box className="title-row" mt={2}>
-              <MDTypography variant="h5" color={darkMode ? "white" : "dark"}>
-                فاتورة بيع
-              </MDTypography>
-              <MDTypography variant="h5" color="primary">
-                #{order.orderNumber}
-              </MDTypography>
+        <Box ref={printRef} className="receipt-paper">
+          <style>{receiptStyles}</style>
+          <Box className="receipt">
+            {/* رأس الفاتورة */}
+            <Box className="receipt__header">
+              <img src={logoUrl} alt="شعار سوير" className="receipt__logo" />
+              <div className="receipt__store">{storeName}</div>
+              <div className="receipt__doc">فاتورة بيع</div>
+              <div className="receipt__number">#{order.orderNumber}</div>
+              <div className="receipt__date">تاريخ الإصدار: {formatDate(new Date())}</div>
             </Box>
-            <MDTypography
-              variant="body2"
-              color={darkMode ? "text.main" : "text.secondary"}
-              align="center"
-            >
-              تاريخ الإصدار: {formatDate(new Date())}
-            </MDTypography>
-          </Box>
 
-          <Grid container spacing={2}>
-            {/* <Grid item xs={12} md={6}>
-              <Box className="section">
-                <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
-                  معلومات المتجر
-                </MDTypography>
-                <MDTypography variant="body2" color="text">
-                  <strong>الاسم:</strong> {storeName}
-                </MDTypography>
-                <MDTypography variant="body2" color="text">
-                  <strong>العنوان:</strong> طرابلس - ليبيا
-                </MDTypography>
-                <MDTypography variant="body2" color="text">
-                  <strong>الهاتف:</strong> 0912345678
-                </MDTypography>
-              </Box>
-            </Grid> */}
+            {/* معلومات العميل */}
+            <div className="receipt__row">
+              <span className="k">العميل</span>
+              <span className="v">{order.shippingName}</span>
+            </div>
+            <div className="receipt__row">
+              <span className="k">الهاتف</span>
+              <span className="v" dir="ltr">
+                {order.shippingPhone}
+              </span>
+            </div>
+            <div className="receipt__row">
+              <span className="k">العنوان</span>
+              <span className="v">{order.shippingAddress}</span>
+            </div>
+            {cityName && (
+              <div className="receipt__row">
+                <span className="k">المدينة</span>
+                <span className="v">{cityName}</span>
+              </div>
+            )}
+            {areaName && (
+              <div className="receipt__row">
+                <span className="k">المنطقة</span>
+                <span className="v">{areaName}</span>
+              </div>
+            )}
 
-            <Grid item xs={12} md={6}>
-              <Box className="section" style={{ marginBottom: "30px" }}>
-                <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
-                  معلومات العميل
-                </MDTypography>
-                <MDTypography variant="body2" color="text">
-                  <strong>الاسم:</strong> {order.shippingName}
-                </MDTypography>
-                <MDTypography variant="body2" color="text">
-                  <strong>الهاتف:</strong> {order.shippingPhone}
-                </MDTypography>
-                <MDTypography variant="body2" color="text">
-                  <strong>العنوان:</strong> {order.shippingAddress}
-                </MDTypography>
-                {cityName && (
-                  <MDTypography variant="body2" color="text">
-                    <strong>المدينة:</strong> {cityName}
-                  </MDTypography>
-                )}
-                {areaName && (
-                  <MDTypography variant="body2" color="text">
-                    <strong>المنطقة:</strong> {areaName}
-                  </MDTypography>
-                )}
-              </Box>
-            </Grid>
-          </Grid>
-
-          {/* <Box className="section" mb={2}>
-            <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
-              تفاصيل الطلب
-            </MDTypography>
-            <Grid container spacing={0}>
-              <Grid item xs={6}>
-                <MDTypography variant="body2" color="text">
-                  <strong>رقم الطلب:</strong> {order.orderNumber}
-                </MDTypography>
-              </Grid>
-              <Grid item xs={6}>
-                <MDTypography variant="body2" color="text">
-                  <strong>تاريخ الطلب:</strong> {formatDate(order.createdAt)}
-                </MDTypography>
-              </Grid>
-              <Grid item xs={6}>
-                <MDTypography variant="body2" color="text">
-                  <strong>الحالة:</strong> {statusLabels[order.status]}
-                </MDTypography>
-              </Grid>
-            </Grid>
-          </Box> */}
-
-          {/* جدول العناصر */}
-          <Box className="section">
-            <MDTypography variant="h6" color={darkMode ? "white" : "dark"} gutterBottom>
-              العناصر المطلوبة
-            </MDTypography>
-            <table className="table" width="100%">
-              <thead>
-                <tr>
-                  <th>المنتج</th>
-                  <th>الكمية</th>
-                  <th>سعر الوحدة</th>
-                  <th>المجموع</th>
-                </tr>
-              </thead>
-              <tbody>
-                {order.items?.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      {item.variant?.product?.name}
-                      {item.variant?.option1 && ` - ${item.variant.option1}`}
-                      {item.variant?.option2 && ` - ${item.variant.option2}`}
-                    </td>
-                    <td>{item.qty}</td>
-                    <td>{formatPrice(item.unitPriceCents)}</td>
-                    <td>{formatPrice(item.unitPriceCents * item.qty)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Box>
-
-          {/* الإجمالي */}
-          <Box className="total-box">
-            <MDBox
-              sx={{
-                px: 2,
-                py: 1.5,
-                borderRadius: 1,
-                backgroundColor: darkMode ? "rgba(255,255,255,0.04)" : "rgba(95,11,40,0.05)",
-              }}
-            >
-              <MDBox className="total-line" display="flex" justifyContent="space-between" mb={0.5}>
-                <MDTypography variant="body1" color="text">
-                  إجمالي المنتجات
-                </MDTypography>
-                <MDTypography variant="body1" fontWeight="medium" color="text">
-                  {formatPrice(itemSubtotal)}
-                </MDTypography>
-              </MDBox>
+            {/* الإجمالي */}
+            <Box className="receipt__totals">
+              <div className="receipt__row">
+                <span className="k">إجمالي المنتجات</span>
+                <span className="v">{formatPrice(itemSubtotal)}</span>
+              </div>
               {hasDeliveryFee && (
-                <MDBox
-                  className="total-line"
-                  display="flex"
-                  justifyContent="space-between"
-                  mb={0.5}
-                >
-                  <MDTypography variant="body1" color="text">
-                    رسوم التوصيل (تدفع عند الاستلام)
-                  </MDTypography>
-                  <MDTypography variant="body1" fontWeight="medium" color="text">
-                    {formatPrice(order.deliveryFeeCents)}
-                  </MDTypography>
-                </MDBox>
+                <div className="receipt__row">
+                  <span className="k">رسوم التوصيل</span>
+                  <span className="v">{formatPrice(order.deliveryFeeCents)}</span>
+                </div>
               )}
-              <MDBox className="total-line grand" display="flex" justifyContent="space-between">
-                <MDTypography variant="h5" color={darkMode ? "white" : "dark"}>
-                  {hasDeliveryFee ? "المبلغ الكلي" : "الإجمالي"}
-                </MDTypography>
-                <MDTypography variant="h5" color="primary">
-                  {formatPrice(grandTotal)}
-                </MDTypography>
-              </MDBox>
-            </MDBox>
-          </Box>
+              <div className="receipt__grand">
+                <span>{hasDeliveryFee ? "المبلغ الكلي" : "الإجمالي"}</span>
+                <span>{formatPrice(grandTotal)}</span>
+              </div>
+            </Box>
 
-          {/* تذييل الفاتورة */}
-          <Box mt={4} pt={2} sx={{ borderTop: "1px solid #ddd" }}>
-            <MDTypography
-              variant="body2"
-              align="center"
-              color={darkMode ? "text.main" : "text.secondary"}
-            >
-              شكراً لثقتكم بمتجر سوير
-            </MDTypography>
-            <MDTypography
-              variant="caption"
-              align="center"
-              color={darkMode ? "text.main" : "text.secondary"}
-              display="block"
-            >
-              للاستفسار: 0912345678
-            </MDTypography>
+            {/* تذييل الفاتورة */}
+            <Box className="receipt__footer">
+              <div>شكراً لثقتكم بمتجر سوير</div>
+              <div>للاستفسار: 0912345678</div>
+            </Box>
           </Box>
         </Box>
 
@@ -343,10 +207,8 @@ InvoicePrint.propTypes = {
   order: PropTypes.shape({
     id: PropTypes.number,
     orderNumber: PropTypes.string,
-    status: PropTypes.string,
     totalCents: PropTypes.number,
     deliveryFeeCents: PropTypes.number,
-    createdAt: PropTypes.string,
     shippingName: PropTypes.string,
     shippingPhone: PropTypes.string,
     shippingAddress: PropTypes.string,
@@ -354,20 +216,6 @@ InvoicePrint.propTypes = {
     deliveryAreaName: PropTypes.string,
     deliveryCity: PropTypes.shape({ name: PropTypes.string }),
     deliveryArea: PropTypes.shape({ name: PropTypes.string }),
-    items: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.number,
-        qty: PropTypes.number,
-        unitPriceCents: PropTypes.number,
-        variant: PropTypes.shape({
-          option1: PropTypes.string,
-          option2: PropTypes.string,
-          product: PropTypes.shape({
-            name: PropTypes.string,
-          }),
-        }),
-      })
-    ),
   }),
 };
 
