@@ -176,7 +176,7 @@ function InvoicePrint({ open, onClose, order }) {
             {/* تذييل الفاتورة */}
             <Box className="receipt__footer">
               <div>شكراً لثقتكم بمتجر سوير</div>
-              <div>للاستفسار: 0912345678</div>
+              <div>للاستفسار / واتساب: 0947102167</div>
             </Box>
           </Box>
         </Box>
