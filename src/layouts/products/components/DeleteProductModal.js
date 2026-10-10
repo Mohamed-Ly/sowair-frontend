@@ -18,13 +18,18 @@ function DeleteProductModal({ open, onClose, onConfirm, product }) {
   const { darkMode } = controller;
 
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleConfirm = async () => {
     setLoading(true);
+    setErrorMessage("");
     try {
       await onConfirm();
     } catch (error) {
       console.error("Error deleting product:", error);
+      setErrorMessage(
+        error?.response?.data?.data?.message || "حدث خطأ أثناء حذف المنتج. جرّب مرة أخرى."
+      );
     } finally {
       setLoading(false);
     }
@@ -67,8 +72,16 @@ function DeleteProductModal({ open, onClose, onConfirm, product }) {
           </MDTypography>
         </MDBox>
         <MDTypography variant="body2" color={darkMode ? "text.main" : "text.secondary"}>
-          لا يمكن التراجع عن هذا الإجراء. سيتم حذف المنتج بشكل دائم.
+          لا يمكن التراجع عن هذا الإجراء. سيتم حذف المنتج بشكل دائم. الملاحظة: المنتجات المرتبطة
+          بطلبات سابقة لا يمكن حذفها نهائياً لحماية التقارير — يمكنك بدلاً من ذلك إلغاء تفعيلها.
         </MDTypography>
+        {errorMessage && (
+          <MDBox mt={2} p={2} bgColor="error.light" borderRadius="md">
+            <MDTypography variant="body2" color="white" fontWeight="medium">
+              {errorMessage}
+            </MDTypography>
+          </MDBox>
+        )}
       </DialogContent>
 
       <DialogActions>
