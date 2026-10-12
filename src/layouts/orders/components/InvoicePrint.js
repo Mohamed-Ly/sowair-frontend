@@ -1,4 +1,4 @@
-﻿import { useRef } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, Box } from "@mui/material";
 import Icon from "@mui/material/Icon";
 import PropTypes from "prop-types";
@@ -9,28 +9,30 @@ import { useMaterialUIController } from "context";
 const receiptStyles = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, Helvetica, sans-serif; background: #fff; color: #1a1a1a; }
-  @page { size: 60mm auto; margin: 0; }
+  /* الورقة الفعلية: 10cm عرضاً × 15cm طولاً (مقاس صورة 4×6 بوصة) */
+  @page { size: 100mm 150mm; margin: 0; }
 
   .receipt-paper { background: #f4f4f4; padding: 16px; border-radius: 8px; }
-  .receipt { width: 6cm; margin: 0 auto; padding: 2mm; direction: rtl; font-size: 12px; line-height: 1.5; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); border-radius: 4px; }
+  .receipt { width: 100mm; margin: 0 auto; padding: 3mm; direction: rtl; font-size: 15px; line-height: 1.35; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); border-radius: 4px; }
 
-  .receipt__header { text-align: center; border-bottom: 1.5px dashed #bbb; padding-bottom: 6px; margin-bottom: 8px; }
-  .receipt__logo { width: 56px; height: 56px; object-fit: contain; margin-bottom: 2px; }
-  .receipt__store { font-size: 15px; font-weight: 700; color: #5f0b28; }
-  .receipt__doc { font-size: 12px; font-weight: 700; margin: 2px 0 1px; }
-  .receipt__number { font-size: 12px; direction: ltr; }
-  .receipt__date { font-size: 10px; color: #666; }
+  .receipt__header { text-align: center; border-bottom: 1.5px dashed #bbb; padding-bottom: 6px; margin-bottom: 7px; }
+  .receipt__logo { width: 72px; height: 72px; object-fit: contain; margin-bottom: 2px; }
+  .receipt__store { font-size: 20px; font-weight: 700; color: #5f0b28; }
+  .receipt__doc { font-size: 16px; font-weight: 700; margin: 2px 0 1px; }
+  .receipt__number { font-size: 15px; direction: ltr; }
+  .receipt__date { font-size: 12px; color: #666; }
 
-  .receipt__row { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed #e3e3e3; padding: 3px 0; }
+  .receipt__row { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed #e3e3e3; padding: 3px 0; }
   .receipt__row .k { color: #666; white-space: nowrap; }
   .receipt__row .v { text-align: left; word-break: break-word; }
 
-  .receipt__totals { margin-top: 8px; }
-  .receipt__grand { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; color: #5f0b28; border-top: 1.5px solid #5f0b28; margin-top: 4px; padding-top: 6px; }
+  .receipt__totals { margin-top: 6px; }
+  .receipt__grand { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; color: #5f0b28; border-top: 1.5px solid #5f0b28; margin-top: 4px; padding-top: 6px; }
 
-  .receipt__footer { text-align: center; margin-top: 10px; border-top: 1px dashed #bbb; padding-top: 6px; font-size: 10px; color: #555; }
+  .receipt__footer { text-align: center; margin-top: 8px; border-top: 1px dashed #bbb; padding-top: 6px; font-size: 12px; color: #555; }
 
   @media print {
+    html, body { width: 100mm; }
     .receipt-paper { background: #fff; padding: 0; }
     .receipt { box-shadow: none; border-radius: 0; }
   }
@@ -43,10 +45,32 @@ function InvoicePrint({ open, onClose, order }) {
   const printRef = useRef();
   const storeName = "متجر سوير";
   const logoUrl = `${window.location.origin}/sowair-logo.png`;
+  const [logoDataUrl, setLogoDataUrl] = useState("");
+
+  // تضمين الشعار كـ data URL حتى لا يعتمد على تحميله من الشبكة وقت الطباعة
+  useEffect(() => {
+    let active = true;
+    fetch(logoUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (active && typeof reader.result === "string") setLogoDataUrl(reader.result);
+        };
+        reader.readAsDataURL(blob);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [logoUrl]);
 
   const handlePrint = () => {
     const printContent = printRef.current;
+    if (!printContent) return;
+
     const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
 
     printWindow.document.write(`
       <html lang="ar" dir="rtl">
@@ -62,9 +86,27 @@ function InvoicePrint({ open, onClose, order }) {
     `);
 
     printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+
+    // انتظر تحميل كل الصور (الشعار) قبل الطباعة، وإلا تُطبع فارغة
+    const waitForImages = () =>
+      Promise.all(
+        Array.from(printWindow.document.images).map((img) =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve;
+              })
+        )
+      );
+
+    waitForImages().then(() => {
+      printWindow.focus();
+      printWindow.print();
+    });
+
+    // أغلق النافذة بعد انتهاء الطباعة فقط (وليس فوراً قبل تحميل الصور)
+    printWindow.onafterprint = () => printWindow.close();
   };
 
   if (!order) return null;
@@ -114,7 +156,7 @@ function InvoicePrint({ open, onClose, order }) {
           <Box className="receipt">
             {/* رأس الفاتورة */}
             <Box className="receipt__header">
-              <img src={logoUrl} alt="شعار سوير" className="receipt__logo" />
+              <img src={logoDataUrl || logoUrl} alt="شعار سوير" className="receipt__logo" />
               <div className="receipt__store">{storeName}</div>
               <div className="receipt__doc">فاتورة بيع</div>
               <div className="receipt__number">#{order.orderNumber}</div>
