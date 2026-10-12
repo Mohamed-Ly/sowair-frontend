@@ -13,10 +13,10 @@ const receiptStyles = `
   @page { size: 100mm 150mm; margin: 0; }
 
   .receipt-paper { background: #f4f4f4; padding: 16px; border-radius: 8px; }
-  .receipt { width: 100mm; margin: 0 auto; padding: 3mm; direction: rtl; font-size: 15px; line-height: 1.35; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); border-radius: 4px; }
+  .receipt { width: 100mm; min-height: 150mm; display: flex; flex-direction: column; box-sizing: border-box; margin: 0 auto; padding: 3mm; direction: rtl; font-size: 15px; line-height: 1.35; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); border-radius: 4px; }
 
   .receipt__header { text-align: center; border-bottom: 1.5px dashed #bbb; padding-bottom: 6px; margin-bottom: 7px; }
-  .receipt__logo { width: 72px; height: 72px; object-fit: contain; margin-bottom: 2px; }
+  .receipt__logo { width: 120px; height: 120px; object-fit: contain; margin-bottom: 2px; }
   .receipt__store { font-size: 20px; font-weight: 700; color: #5f0b28; }
   .receipt__doc { font-size: 16px; font-weight: 700; margin: 2px 0 1px; }
   .receipt__number { font-size: 15px; direction: ltr; }
@@ -29,7 +29,7 @@ const receiptStyles = `
   .receipt__totals { margin-top: 6px; }
   .receipt__grand { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; color: #5f0b28; border-top: 1.5px solid #5f0b28; margin-top: 4px; padding-top: 6px; }
 
-  .receipt__footer { text-align: center; margin-top: 8px; border-top: 1px dashed #bbb; padding-top: 6px; font-size: 12px; color: #555; }
+  .receipt__footer { text-align: center; margin-top: auto; border-top: 1px dashed #bbb; padding-top: 6px; font-size: 12px; color: #555; }
 
   @media print {
     html, body { width: 100mm; }
